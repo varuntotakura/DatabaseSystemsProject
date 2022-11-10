@@ -24,13 +24,14 @@ double determine_interval(double t[]){
     return median(eps, sizeof(eps));
 }
 
-double match_searching(doublt t[], double eps_t, s_0, double lmd_a, double lmd_d){
+double match_searching(double t[], double eps_t, double s_0, double lmd_a, double lmd_d){
     int n = sizeof(t);
-    stack<double> dp;
-    stack<double> op;
+    double dp[99]; // stack<double> dp;
+    double op[99]; // stack<double> op;
+    double temp[99];
     for(int i=1; i<(n+1); i++){
-        dp[i].push([]);
-        op[i].push([]);
+        dp[i].push(temp);
+        op[i].push(temp);
     }
     dp[0].push(0);
     op[0].push(0);
