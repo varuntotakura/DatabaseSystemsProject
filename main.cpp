@@ -1,148 +1,121 @@
-import os
-import numpy as np
-import pandas as pd
-from datetime import datetime
-from exact import exact_repair
-from exact_v import exact_repair_v
-from approximation import median_approximation_all
-from metrics import cal_rmse, cal_cost, calDTW, calAccuracy
-import time
+#include <bits/stdc++.h>
+#include <iostream>
+#include <stack>
+#include <cstdlib>
+#include <cmath>
+#include <algorithm>
+#include <vector>
+#include <string>
 
-def time2ts(seq, time_scale):
-    ts_list = []
-    for t in list(seq):
-        timeArray = datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
-        timeStamp = float(timeArray.timestamp()) * time_scale
-        ts_list.append(timeStamp)
-    return ts_list
+using namespace std;
 
+void main(){
+    string version = "-test";
+    string datasets = "energy";
+    string methods = "exact"; //aproximate
+    bool data_characteristic = false;
+    map<string, double> result_dfs = {};
 
-def equal_series_generate(eps_t, s_0, m):
-    return [s_0 + i*eps_t for i in range(m)]
+    result_dfs["rmse"] = pd.DataFrame(0, columns=methods, index=datasets);
+    result_dfs["time"] = pd.DataFrame(0, columns=methods, index=datasets);
 
+    int file_counts = 5;
+    int truth_col = 1;
+    string truth_dir = "../data/energy";
+    int original_col = 1;
+    string original_dir = "../data/dirty_energy";
+    int start_point_granularity = 1;
+    int interval_granularity = 1;
+    int lmd_a = 100;
+    int lmd_d = 100;
+    long eps_t_e, s_0_e, m_e;
+    long eps_t_a, s_0_a, m_a;
+    map<string, double> result_map = {};
+    result_map["exact-rmse"] = 0;
+    result_map["exact-time"] = 0;
+    string dataset_path = "../result/energy";
+    for(int ts = 0; ts<file_counts; ts++){
+        string file_name = "../data/dirty_energy/series_"+ts+".csv";
+        string data_truth = "../data/energy/series_"+ts+".csv";
 
-def metric_res(repair, truth, fault, metric_name="cost"):
-    """
-    :param metric_id: 0: repair cost metric, 1: dtw metric, 2:rmse metric
-    :return: loss
-    """
-    if metric_name == "cost":
-        lmd_a = 5 * (truth[1] - truth[0])
-        lmd_d = 5 * (truth[1] - truth[0])
-        return cal_cost(truth, repair, lmd_a, lmd_d)
-    elif metric_name == "dtw":
-        return calDTW(truth, repair)
-    elif metric_name == "accuracy":
-        truth = pd.Series(truth)
-        repair = pd.Series(repair)
-        return calAccuracy(truth, fault, repair)
-    else:
-        truth = pd.Series(truth)
-        repair = pd.Series(repair)
-        return cal_rmse(truth, repair)
+        data = pd.read_csv(file_name);
+        original_seq = data.iloc[:, param["original_col"]]
+        source_values = None
+        # source_values = data.iloc[:, param["original_col"] + 1] # values
+        ground_truth_seq = data_truth.iloc[:, param["truth_col"]]
 
+        double* original = original_seq;
+        double* truth = ground_truth_seq;
 
-if __name__ == "__main__":
-    parameters = {
-        "energy":{
-            "file_counts": 5,
-            "truth_col": 1,
-            "truth_dir": "../data/energy",
-            "original_col": 1,
-            "original_dir": "../data/dirty_energy",
-            "start_point_granularity": 1,
-            "interval_granularity": 1,
-            "lmd_a": 100,
-            "lmd_d": 100,
-        },
-    }
+        start = time.time()
+        
+        if (data_characteristic){
+            eps_t_e, s_0_e, m_e = exact_repair_v(original, source_values, lmd_a, lmd_d, interval_granularity, start_point_granularity);
+        } else {
+            eps_t_e, s_0_e, m_e = exact_repair(original, lmd_a, lmd_d, interval_granularity, start_point_granularity);
+        }
+        
+        end = time.time()
+        double exact_time = end - start;
 
-    version = "-test"
-    datasets = ["energy"]
-    metrics = ["rmse"]
-    methods = ["exact", "approximate"]
-    data_characteristic = False
-    result_dfs = {}
-    for m in metrics:
-        result_dfs[m] = pd.DataFrame(0, columns=methods, index=datasets)
-        result_dfs[m] = result_dfs[m].astype("float32")
-    result_dfs["time"] = pd.DataFrame(0, columns=methods, index=datasets)
-    result_dfs["time"] = result_dfs["time"].astype("float32")
+        start = time.time()
+        
+        eps_t_a, s_0_a, m_a = median_approximation_all(original, lmd_a, lmd_d, interval_granularity);
+        
+        end = time.time()
 
-    print(result_dfs)
+        double appro_time = end - start;
 
-    for dataset in datasets:
-        param = parameters[dataset]
-        file_counts = param["file_counts"]
-        result_map = {}
-        for method in methods:
-            for metric in metrics:
-                result_map[f'{method}-{metric}'] = []
-            result_map[f'{method}-time'] = []
+        double* exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
+        double* appro_res = equal_series_generate(eps_t_a, s_0_a, m_a);
 
-        dataset_path = os.path.join("../result/", dataset)
-        print(os.path.abspath("./"))
-        if not os.path.exists(dataset_path):
-            os.mkdir(dataset_path)
-        for ts in range(file_counts):
-            print(ts)
-            original_dir = param["original_dir"]
-            file_name = os.path.join(original_dir, f"series_{ts}.csv")
-            data = pd.read_csv(file_name)
-            original_seq = data.iloc[:, param["original_col"]]
-            source_values = None
-            # source_values = data.iloc[:, param["original_col"] + 1] # values
-
-            truth_dir = param["truth_dir"]
-            data_truth = pd.read_csv(os.path.join(truth_dir, f"series_{ts}.csv"))
-            ground_truth_seq = data_truth.iloc[:, param["truth_col"]]
-
-            if "time_scale" in param:
-                original = time2ts(original_seq, param["time_scale"])
-                truth = time2ts(ground_truth_seq, param["time_scale"])
-            else:
-                original = list(original_seq)
-                truth = list(ground_truth_seq)
-
-            lmd_a = param["lmd_a"]
-            lmd_d = param["lmd_d"]
-            interval_granularity = param["interval_granularity"]
-            start_point_granularity = param["start_point_granularity"]
-
-            start = time.time()
-            if data_characteristic:
-                eps_t_e, s_0_e, m_e = exact_repair_v(original, source_values, lmd_a, lmd_d, interval_granularity, start_point_granularity)
-            else:
-                eps_t_e, s_0_e, m_e = exact_repair(original, lmd_a, lmd_d, interval_granularity, start_point_granularity)
-            print("exact end")
-            end = time.time()
-            exact_time = end - start
-
-            start = time.time()
-            eps_t_a, s_0_a, m_a = median_approximation_all(original, lmd_a, lmd_d, interval_granularity)
-            print("approximate end")
-            end = time.time()
-            appro_time = end - start
-
-            exact_res = equal_series_generate(eps_t_e, s_0_e, m_e)
-            appro_res = equal_series_generate(eps_t_a, s_0_a, m_a)
-
-            for metric in metrics:
-                print(metric, "exact")
-                result_map[f"exact-{metric}"].append(metric_res(exact_res, truth, original,metric))
-                print(metric, "approximate")
-                result_map[f"approximate-{metric}"].append(metric_res(appro_res, truth, original, metric))
-            result_map[f"exact-time"].append(exact_time)
-            result_map[f"approximate-time"].append(appro_time)
+        result_map["exact-rmse"] = metric_res(exact_res, truth, original, metric);
+        // result_map["approximate-rmse"] = metric_res(appro_res, truth, original, metric);
+        result_map["exact-time"] = exact_time;
+        // result_map["approximate-time"] = appro_time;
 
         for metric in (metrics + ["time"]):
-            result_dfs[metric].at[dataset, "exact"] = np.mean(result_map[f"exact-{metric}"])
+            result_dfs["rmse"].at[dataset, "exact"] = np.mean(result_map[f"exact-{metric}"])
             np.savetxt(os.path.join(dataset_path, f"exact-{metric}{version}.txt"), result_map[f"exact-{metric}"])
             result_dfs[metric].at[dataset, "approximate"] = np.mean(result_map[f"approximate-{metric}"])
             np.savetxt(os.path.join(dataset_path, f"approximate-{metric}{version}.txt"), result_map[f"approximate-{metric}"])
 
     for metric in (metrics + ["time"]):
         result_dfs[metric].to_csv(os.path.join("result", f"exp1-{metric}{version}.csv"))
+        
+    return;
+}
 
 
+long* time2ts(long* seq, long time_scale){
+    long* ts_list;
+    for(int i = 0; i <= sizeof(seq); i++){
+        long timeArray = datetime.strptime(seq[i], "%Y-%m-%d %H:%M:%S.%f");
+        long timeStamp = float(timeArray.timestamp()) * time_scale;
+        ts_list[i] = timeStamp;
+    }
+    return ts_list;
+}
 
+
+double* equal_series_generate(long eps_t, long s_0, long m){
+    double* ret;
+    for(int i = 0; i <= m; i++){
+        ret[i] = s_0 + i*eps_t;
+    }
+    return ret;
+}
+
+double metric_res(long* repair, long* truth, fault, string metric_name="cost"){
+    if(metric_name == "cost"){
+        long lmd_a = 5 * (truth[1] - truth[0]);
+        long lmd_d = 5 * (truth[1] - truth[0]);
+        return cal_cost(truth, repair, lmd_a, lmd_d);
+    } else if(metric_name == "dtw"){
+        return calDTW(truth, repair);
+    } else if(metric_name == "accuracy"){
+        return calAccuracy(truth, fault, repair);
+    } else{
+        return cal_rmse(truth, repair);
+    }
+}
