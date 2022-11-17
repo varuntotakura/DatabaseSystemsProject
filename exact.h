@@ -1,3 +1,6 @@
+#ifndef EXACT_H    // To make sure you don't declare the function more than once by including the header multiple times.
+#define EXACT_H
+
 #include "exact.h"
 #include <bits/stdc++.h>
 #include <iostream>
@@ -214,3 +217,6 @@ bool check_st_lb(int d, long* eps_list, long min_cost, long lmd_d, long eps_t){
     return (c < min_cost);
 }
 
+
+
+#endif
