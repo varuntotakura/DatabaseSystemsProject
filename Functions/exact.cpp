@@ -1,7 +1,4 @@
-#ifndef EXACT_H    // To make sure you don't declare the function more than once by including the header multiple times.
-#define EXACT_H
-
-#include "exact.h"
+// #include "exact.h"
 #include <bits/stdc++.h>
 #include <iostream>
 #include <stack>
@@ -26,6 +23,67 @@ long determine_interval(long* t){
         eps[i-1] = t[i] - t[i-1];
     }
     return median(eps, sizeof(eps));
+}
+
+// bool find(long* arr, long elem){
+bool find(stack<long> arr, long elem){
+    int n = sizeof(arr)/sizeof(arr);
+    int i = n;
+    bool temp = false;
+    while (i >= 0)
+    {
+        if (arr.top() == elem) {
+            arr.pop();
+            temp = true;
+            break;
+        }
+        i--;
+    }
+    return temp;
+}
+
+bool check_interval_lb(long interval, long min_cost, long* eps_list){
+    long c = 0;
+    for(int i = 0; i<=sizeof(eps_list); i++){
+        c += abs(interval - eps_list[i]);
+    }
+    return (c <= min_cost);
+}
+
+bool check_st_lb(int d, long* eps_list, long min_cost, long lmd_d, long eps_t){
+    long c = d * lmd_d;
+    for(int i=d; i<=sizeof(eps_list); i++){
+        c += abs(eps_t - eps_list[i]);
+    }
+    return (c < min_cost);
+}
+
+long** trace_back(double** op, double* t, long s_0, long eps_t, long m_best){
+    int n = sizeof(t);
+    // vector<int> M;
+    long** M;
+    int i = n;
+    int j = m_best;
+    int count = 0;
+    while(i > 0 && j > 0){
+        if(op[i][j] == 0){
+            M[count][0] = i-1;
+            M[count][1] = j-1;
+            i = i - 1;
+            j = j - 1;
+        } else if(op[i][j] == 1){
+            M[count][0] = -1;
+            M[count][1] = j-1;
+            j = j - 1;
+        } else{
+            M[count][0] = i-1;
+            M[count][1] = -1;
+            i = i - 1;
+        }  
+        count += 1;
+    }
+    // M = reverse(M.begin(), M.end());
+    return M;
 }
 
 long match_searching(double* t, long eps_t, long s_0, long lmd_a, long lmd_d){
@@ -79,39 +137,11 @@ long match_searching(double* t, long eps_t, long s_0, long lmd_a, long lmd_d){
     return M, min_cost, m_best;
 }
 
-long** trace_back(double** op, double* t, long s_0, long eps_t, long m_best){
-    int n = sizeof(t);
-    // vector<int> M;
-    long** M;
-    int i = n;
-    int j = m_best;
-    int count = 0;
-    while(i > 0 && j > 0){
-        if(op[i][j] == 0){
-            M[count][0] = i-1;
-            M[count][1] = j-1;
-            i = i - 1;
-            j = j - 1;
-        } else if(op[i][j] == 1){
-            M[count][0] = -1;
-            M[count][1] = j-1;
-            j = j - 1;
-        } else{
-            M[count][0] = i-1;
-            M[count][1] = -1;
-            i = i - 1;
-        }  
-        count += 1;
-    }
-    // M = reverse(M.begin(), M.end());
-    return M;
-}
-
 long round_to_granularity(long value, long granularity){
     return round(value / granularity) * granularity;
 }
 
-long exact_repair(double* t, long lmd_a=10, long lmd_d=10, int interval_granularity=1, int start_point_granularity=1, int bias_d=1, int bias_s=3){
+long exact_repair(double* t, long lmd_a, long lmd_d, int interval_granularity, int start_point_granularity, int bias_d, int bias_s){
     long* eps_list;
     int n = sizeof(t);
     for(int i = 0; i <= n; i++){
@@ -184,39 +214,4 @@ long exact_repair(double* t, long lmd_a=10, long lmd_d=10, int interval_granular
     return min_eps_t, min_s_0, m_best;
 }
 
-// bool find(long* arr, long elem){
-bool find(stack<long> arr, long elem){
-    int n = sizeof(arr)/sizeof(arr);
-    int i = n;
-    bool temp = false;
-    while (i >= 0)
-    {
-        if (arr.top() == elem) {
-            arr.pop();
-            temp = true;
-            break;
-        }
-        i--;
-    }
-    return temp;
-}
 
-bool check_interval_lb(long interval, long min_cost, long* eps_list){
-    long c = 0;
-    for(int i = 0; i<=sizeof(eps_list); i++){
-        c += abs(interval - eps_list[i]);
-    }
-    return (c <= min_cost);
-}
-
-bool check_st_lb(int d, long* eps_list, long min_cost, long lmd_d, long eps_t){
-    long c = d * lmd_d;
-    for(int i=d; i<=sizeof(eps_list); i++){
-        c += abs(eps_t - eps_list[i]);
-    }
-    return (c < min_cost);
-}
-
-
-
-#endif

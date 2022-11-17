@@ -10,59 +10,15 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <exact.h>
-#include <metrics.h>
-
-long exact_repair();
-long match_searching();
-long** trace_back();
-double cal_cost();
-double calDTW();
-double calAccuracy();
-double cal_rmse();
+#include "Functions\exact.h"
+#include "Functions\metrics.h"
 
 using namespace std;
 
-// long* time2ts(long* seq, long time_scale){
-//     long* ts_list;
-//     for(int i = 0; i <= sizeof(seq); i++){
-//         long timeArray = datetime.strptime(seq[i], "%Y-%m-%d %H:%M:%S.%f");
-//         long timeStamp = float(timeArray.timestamp()) * time_scale;
-//         ts_list[i] = timeStamp;
-//     }
-//     return ts_list;
-// }
-
-double* equal_series_generate(long eps_t, long s_0, long m){
-    double* ret;
-    for(int i = 0; i <= m; i++){
-        ret[i] = s_0 + i*eps_t;
-    }
-    return ret;
-}
-
-double metric_res(double* repair, double* truth, double* fault, string metric_name="cost"){
-    double calCost = cal_cost();  
-    double cal_DTW = calDTW();  
-    double cal_Accuracy = calAccuracy();  
-    double calRmse = cal_rmse();
-    if(metric_name == "cost"){
-        long lmd_a = 5 * (truth[1] - truth[0]);
-        long lmd_d = 5 * (truth[1] - truth[0]);
-        return calCost(truth, repair, lmd_a, lmd_d);
-    } else if(metric_name == "dtw"){
-        return cal_DTW(truth, repair);
-    } else if(metric_name == "accuracy"){
-        return cal_Accuracy(truth, fault, repair);
-    } else{
-        return calRmse(truth, repair);
-    }
-}
-
 void main(){
-    long match_search = match_searching();  
-    long** trace = trace_back();  
-    long exact_repr = exact_repair();  
+    // long match_search = match_searching();  
+    // long** trace = trace_back();  
+    // long exact_repr = exact_repair();  
     string version = "-test";
     string datasets = "energy";
     string methods = "exact"; //aproximate
@@ -86,6 +42,8 @@ void main(){
     int lmd_d = 100;
     long eps_t_e, s_0_e, m_e;
     long eps_t_a, s_0_a, m_a;
+    int bias_d = 1;
+    int bias_s = 3;
     // map<string, double> result_map = {};
     // result_map["exact-rmse"] = 0;
     // result_map["exact-time"] = 0;
@@ -152,36 +110,29 @@ void main(){
         }
 
         long source_values = 0;
-        // if "time_scale" in param:
-        //     original = time2ts(original_seq, param["time_scale"])
-        //     truth = time2ts(ground_truth_seq, param["time_scale"])
+        long time_scale;
+        if(time_scale){
+            original_seq = time2ts(original_seq, time_scale);
+            ground_truth_seq = time2ts(ground_truth_seq, time_scale);
+        }
 
         // if (data_characteristic){
         //     eps_t_e, s_0_e, m_e = exact_repair_v(original_seq, source_values, lmd_a, lmd_d, interval_granularity, start_point_granularity);
         // } else {
-        eps_t_e, s_0_e, m_e = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity);
+        eps_t_e, s_0_e, m_e = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
         // }
         
         // eps_t_a, s_0_a, m_a = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
 
-        double* exact_res;
-        exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
+        double* exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
         // double* appro_res = equal_series_generate(eps_t_a, s_0_a, m_a);
 
         result_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+        // result_map["exact-time"] = exact_time;
         // result_map["approximate-rmse"] = metric_res(appro_res, truth, original, metric);
         // result_map["approximate-time"] = appro_time;
-
-        cout << result_rmse <<endl;
-
-        // for metric in (metrics + ["time"]):
-        //     result_dfs["rmse"].at[dataset, "exact"] = np.mean(result_map[f"exact-{metric}"])
-        //     np.savetxt(os.path.join(dataset_path, f"exact-{metric}{version}.txt"), result_map[f"exact-{metric}"])
-        //     result_dfs[metric].at[dataset, "approximate"] = np.mean(result_map[f"approximate-{metric}"])
-        //     np.savetxt(os.path.join(dataset_path, f"approximate-{metric}{version}.txt"), result_map[f"approximate-{metric}"])
-
-    // for metric in (metrics + ["time"]):
-    //     result_dfs[metric].to_csv(os.path.join("result", f"exp1-{metric}{version}.csv"))
-        
+    }
+    cout << result_rmse <<endl;      
+    // cout << result_time <<endl;   
     return;
 }
