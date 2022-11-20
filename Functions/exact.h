@@ -12,21 +12,21 @@
 
 using namespace std;
 
-long median(long*, int);
+double median(double*, int);
 
-long determine_interval(long*);
+double determine_interval(double*);
 
-// bool find(long*, long);
-bool find(stack<long>, long);
+// bool find(double*, double);
+bool find(stack<double>, double);
 
-bool check_interval_lb(long, long, long*);
+bool check_interval_lb(double, double, double*);
 
-bool check_st_lb(int, long*, long, long, long);
+bool check_st_lb(int, double*, double, double, double);
 
-long** trace_back(double**, double*, long, long, long);
+double** trace_back(double**, double*, double, double, double);
 
-long match_searching(double*, long, long, long, long);
+double match_searching(double*, double, double, double, double);
 
-long round_to_granularity(long, long);
+double round_to_granularity(double, double);
 
-long exact_repair(double*, long, long, int, int, int, int);
+double exact_repair(double*, double, double, int, int, int, int);

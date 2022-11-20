@@ -11,8 +11,8 @@
 
 using namespace std;
 
-double* time2ts(double* seq, long time_scale){
-    long* ts_list;
+double* time2ts(double* seq, double time_scale){
+    double* ts_list;
     for(int i = 0; i <= sizeof(seq); i++){
         time_t timeArray = datetime.strptime(seq[i], "%Y-%m-%d %H:%M:%S.%f");
         time_t timeStamp = float(timeArray.timestamp()) * time_scale;
@@ -21,7 +21,7 @@ double* time2ts(double* seq, long time_scale){
     return ts_list;
 }
 
-double* equal_series_generate(long eps_t, long s_0, long m){
+double* equal_series_generate(double eps_t, double s_0, double m){
     double* ret;
     for(int i = 0; i <= m; i++){
         ret[i] = s_0 + i*eps_t;
@@ -29,7 +29,7 @@ double* equal_series_generate(long eps_t, long s_0, long m){
     return ret;
 }
 
-double cal_cost(double* truth, double* repair, long lmd_a, long lmd_d) {
+double cal_cost(double* truth, double* repair, double lmd_a, double lmd_d) {
     lmd_a = 5;
     lmd_d = 5;
     double* s1 = repair;
@@ -137,8 +137,8 @@ double calDTW(double* s1, double* s2) {
 double metric_res(double* repair, double* truth, double* fault, string metric_name){
     metric_name="cost";
     if(metric_name == "cost"){
-        long lmd_a = 5 * (truth[1] - truth[0]);
-        long lmd_d = 5 * (truth[1] - truth[0]);
+        double lmd_a = 5 * (truth[1] - truth[0]);
+        double lmd_d = 5 * (truth[1] - truth[0]);
         return cal_cost(truth, repair, lmd_a, lmd_d);
     } else if(metric_name == "dtw") {
         return calDTW(truth, repair);

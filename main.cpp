@@ -15,10 +15,10 @@
 
 using namespace std;
 
-void main(){
-    // long match_search = match_searching();  
-    // long** trace = trace_back();  
-    // long exact_repr = exact_repair();  
+int main(){
+    // double match_search = match_searching();  
+    // double** trace = trace_back();  
+    // double exact_repr = exact_repair();  
     string version = "-test";
     string datasets = "energy";
     string methods = "exact"; //aproximate
@@ -40,8 +40,8 @@ void main(){
     int interval_granularity = 1;
     int lmd_a = 100;
     int lmd_d = 100;
-    long eps_t_e, s_0_e, m_e;
-    long eps_t_a, s_0_a, m_a;
+    double eps_t_e, s_0_e, m_e;
+    double eps_t_a, s_0_a, m_a;
     int bias_d = 1;
     int bias_s = 3;
     // map<string, double> result_map = {};
@@ -57,7 +57,7 @@ void main(){
         double* ground_truth_seq;
         double* data_rows_2;
         string metric = "cost";
-        long** data_rows;
+        double** data_rows;
         int cnt = 0;
 
         fstream file(file_name, ios::in);
@@ -109,8 +109,8 @@ void main(){
             cout << "Could not open the file\n";
         }
 
-        long source_values = 0;
-        long time_scale;
+        double source_values = 0;
+        double time_scale;
         if(time_scale){
             original_seq = time2ts(original_seq, time_scale);
             ground_truth_seq = time2ts(ground_truth_seq, time_scale);
@@ -134,5 +134,5 @@ void main(){
     }
     cout << result_rmse <<endl;      
     // cout << result_time <<endl;   
-    return;
+    return 0;
 }

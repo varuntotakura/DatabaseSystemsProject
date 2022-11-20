@@ -10,11 +10,11 @@
 
 using namespace std;
 
-double* time2ts(double*, long);
+double* time2ts(double*, double);
 
-double* equal_series_generate(long, long, long);
+double* equal_series_generate(double, double, double);
 
-double cal_cost(double*, double*, long, long);
+double cal_cost(double*, double*, double, double);
 
 double cal_rmse(double*, double*);
 
