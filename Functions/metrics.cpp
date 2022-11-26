@@ -11,15 +11,15 @@
 
 using namespace std;
 
-double* time2ts(double* seq, double time_scale){
-    double* ts_list;
-    for(int i = 0; i <= sizeof(seq); i++){
-        time_t timeArray = datetime.strptime(seq[i], "%Y-%m-%d %H:%M:%S.%f");
-        time_t timeStamp = float(timeArray.timestamp()) * time_scale;
-        ts_list[i] = timeStamp;
-    }
-    return ts_list;
-}
+// double* time2ts(double* seq, double time_scale){
+//     double* ts_list;
+//     for(int i = 0; i <= sizeof(seq); i++){
+//         time_t timeArray = datetime.strptime(seq[i], "%Y-%m-%d %H:%M:%S.%f");
+//         time_t timeStamp = float(timeArray.timestamp()) * time_scale;
+//         ts_list[i] = timeStamp;
+//     }
+//     return ts_list;
+// }
 
 double* equal_series_generate(double eps_t, double s_0, double m){
     double* ret;
@@ -129,6 +129,7 @@ double calDTW(double* s1, double* s2) {
     for(int j=1; j<=n; j++){
         for(int i=1; i<=m; i++){
             dp[i][j] = min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]) + abs(s1[i] - s2[j]);
+        }
     }
     double ret = dp[-1][-1];
     return ret;
