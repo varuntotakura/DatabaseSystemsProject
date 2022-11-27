@@ -12,38 +12,40 @@
 #include <sstream>
 #include <ctime>
 #include <time.h>
-#include <sstream>
+#include <array> 
 // #include "Functions\exact.h"
 // #include "Functions\metrics.h"
 
 using namespace std;
 
-double median(double* arr, int size){
-   sort(arr, arr+size);
-   if (size % 2 != 0) {
-      return (double)arr[size/2];
-   }
-   return (double)(arr[(size-1)/2] + arr[size/2])/2.0;
-}
-
-double determine_interval(double* t){
-    double eps[100];
-    int i;
-    for(i = 1; i<sizeof(t); i++){
-        eps[i-1] = t[i] - t[i-1];
+long median(vector<long> arr, long size){
+    // cout << "median" <<endl;
+    if (size % 2 != 0) {
+        return (long)arr[size/2];
     }
-    return median(eps, sizeof(eps));
+    return (long)(arr[(size-1)/2] + arr[size/2])/2.0;
 }
 
-// bool find(double* arr, double elem){
-bool find(stack<double> arr, double elem){
-    int n = sizeof(arr)/sizeof(arr);
+long determine_interval(vector<long> t){
+    // cout << "determine_interval" <<endl;
+    vector<long> eps;
+    int i;
+    for(i = 1; i<t.size(); i++){
+        eps.push_back((long)t[i] - t[i-1]);
+    }
+    return median(eps, eps.size());
+}
+
+// bool find(long* arr, long elem){
+bool find(vector<long> arr, long elem){
+    // cout << "find" <<endl;
+    int n = arr.size();
     int i = n;
     bool temp = false;
-    while (i >= 0)
+    while (i > 0)
     {
-        if (arr.top() == elem) {
-            arr.pop();
+        if (arr.back() == elem) {
+            arr.pop_back();
             temp = true;
             break;
         }
@@ -52,42 +54,42 @@ bool find(stack<double> arr, double elem){
     return temp;
 }
 
-bool check_interval_lb(double interval, double min_cost, double* eps_list){
-    double c = 0;
-    for(int i = 0; i<=sizeof(eps_list); i++){
+bool check_interval_lb(long interval, long min_cost, vector<long> eps_list){
+    // cout << "check_interval_lb" <<endl;
+    long c = 0;
+    for(int i = 0; i<=eps_list.size(); i++){
         c += abs(interval - eps_list[i]);
     }
     return (c <= min_cost);
 }
 
-bool check_st_lb(int d, double* eps_list, double min_cost, double lmd_d, double eps_t){
-    double c = d * lmd_d;
-    for(int i=d; i<=sizeof(eps_list); i++){
+bool check_st_lb(int d, vector<long> eps_list, long min_cost, long lmd_d, long eps_t){
+    // cout << "check_st_lb" <<endl;
+    long c = d * lmd_d;
+    for(int i=d; i<=eps_list.size(); i++){
         c += abs(eps_t - eps_list[i]);
     }
     return (c < min_cost);
 }
 
-double** trace_back(double** op, double* t, double s_0, double eps_t, double m_best){
-    int n = sizeof(t);
+vector<vector<long>> trace_back(vector<vector<long>> op, vector<long> t, long s_0, long eps_t, long m_best){
+    // cout << "trace_back" <<endl; 
+    int n = t.size();
     // vector<int> M;
-    double** M;
-    int i = n;
-    int j = m_best;
+    vector<vector<long>> M;
+    long i = n;
+    long j = m_best;
     int count = 0;
     while(i > 0 && j > 0){
         if(op[i][j] == 0){
-            M[count][0] = i-1;
-            M[count][1] = j-1;
+            M.push_back({i-1, j-1});
             i = i - 1;
             j = j - 1;
         } else if(op[i][j] == 1){
-            M[count][0] = -1;
-            M[count][1] = j-1;
+            M.push_back({-1, j-1});
             j = j - 1;
         } else{
-            M[count][0] = i-1;
-            M[count][1] = -1;
+            M.push_back({i-1, -1});
             i = i - 1;
         }  
         count += 1;
@@ -96,24 +98,30 @@ double** trace_back(double** op, double* t, double s_0, double eps_t, double m_b
     return M;
 }
 
-double match_searching(double* t, double eps_t, double s_0, double lmd_a, double lmd_d){
-    // vector<double> dp; // double dp[99]; // stack<double> dp;
-    // vector<double> op; // double op[99]; // stack<double> op;
+long match_searching(vector<long> t, long eps_t, long s_0, long lmd_a, long lmd_d){
+    // cout << "match_searching" <<endl; 
+    // vector<long> dp; // long dp[99]; // stack<long> dp;
+    // vector<long> op; // long op[99]; // stack<long> op;
     // for(int i=1; i<(n+1); i++){
     //     dp.push_back({});
     //     op.push_back({});
     // }
-    int n = sizeof(t);
-    double** dp;
-    double** op;
-    dp[0][0] = 0;
+    int n = t.size();
+    vector<vector<long>> dp;
+    vector<vector<long>> op;
+    for(int i=0; i<=n; i++){
+        dp.push_back(vector<long>());
+        op.push_back(vector<long>());
+    }
+    dp[0].push_back(0);
+    op[0].push_back(0);
     for(int i=1; i<n+1; i++){
-        dp[i][0] = i*lmd_a;
-        op[i][0] = 1;
+        dp[i].push_back(i*lmd_a);
+        op[i].push_back(1);
     }
     for(int i=1; i<n+1; i++){
-        dp[0][i] = i*lmd_d;
-        op[0][i] = 2;
+        dp[0].push_back(i*lmd_d);
+        op[0].push_back(2);
     }
     float m_best = 10e8;
     float m_ub = 10e8;
@@ -121,60 +129,61 @@ double match_searching(double* t, double eps_t, double s_0, double lmd_a, double
     int m = 1;
     while(m <= m_ub){
         for(int i = 1; i <= n; i++){
-            double s_m = s_0 + (m-1) * eps_t;
-            double move_res = dp[i-1][m-1] + abs(t[i-1]-s_m);
-            double add_res = dp[i][m - 1] + lmd_a;
-            double del_res = dp[i-1][m]+lmd_d;
+            long s_m = s_0 + (m-1) * eps_t;
+            long move_res = dp[i-1][m-1] + abs(t[i-1]-s_m);
+            long add_res = dp[i][m - 1] + lmd_a;
+            long del_res = dp[i-1][m]+lmd_d;
             if(move_res <= add_res && move_res <= del_res){
-                dp[i][m] = move_res;
-                op[i][m] = 0;
+                dp[i].push_back(move_res);
+                op[i].push_back(0);
             } else if(add_res <= move_res && add_res <= del_res){
-                dp[i][m] = add_res;
-                op[i][m] = 1;
+                dp[i].push_back(add_res);
+                op[i].push_back(1);
             } else {
-                dp[i][m] = del_res;
-                op[i][m] = 2;
+                dp[i].push_back(del_res);
+                op[i].push_back(2);
             }
         }
         if(dp[n][m] < min_cost){
-            double min_cost = dp[n][m];
-            int m_best = m;
-            double m_ub = floor(min_cost/lmd_a)+n;
+            min_cost = dp[n][m];
+            m_best = m;
+            m_ub = floor(min_cost/lmd_a)+n;
         }
         m += 1;
     };
-    double** M = trace_back(op, t, s_0, eps_t, m_best);
+    vector<vector<long>> M = trace_back(op, t, s_0, eps_t, m_best);
     return M, min_cost, m_best;
 }
 
-double round_to_granularity(double value, double granularity){
+long round_to_granularity(long value, long granularity){
     return round(value / granularity) * granularity;
 }
 
-double exact_repair(double* t, double lmd_a, double lmd_d, int interval_granularity, int start_point_granularity, int bias_d, int bias_s){
-    double* eps_list;
-    int n = sizeof(t);
+long exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_granularity, int start_point_granularity, int bias_d, int bias_s){
+    // cout << "exact_repair" <<endl; 
+    vector<long> eps_list;
+    int n = t.size();
     for(int i = 0; i <= n; i++){
-        eps_list[i] = t[i]-t[i-1];
+        eps_list.push_back((long)t[i]-t[i-1]);
     }
-    double eps_md = median(eps_list, n);
-    double eps_t = round_to_granularity(eps_md, interval_granularity);
-    stack<double> eps_t_traverse_range;// double* eps_t_traverse_range;
-    stack<double> eps_t_traversed;// double* eps_t_traversed;
+    long eps_md = median(eps_list, n);
+    long eps_t = round_to_granularity(eps_md, interval_granularity);
+    vector<long> eps_t_traverse_range;// long* eps_t_traverse_range;
+    vector<long> eps_t_traversed;// long* eps_t_traversed;
     float min_cost = 10e8;
-    double** M;
+    vector<vector<long>> M;
     float cost;
     float m;
-    double min_eps_t;
-    double min_s_0;
+    long min_eps_t;
+    long min_s_0;
     bool flag_increase = false;
     bool flag_decrease = false;
     bool min_cost_change = false;
     float m_best;
+    int d = 0;
     while(true){
-        int d = 0;
         while(((d == 0) || check_st_lb(d, eps_list, min_cost, lmd_d, eps_t)) && d < n && d < bias_d){
-            double s_0 = t[d];
+            long s_0 = t[d];
             while(s_0 <= t[d] + bias_s){
                 M, cost, m = match_searching(t, eps_t, s_0, lmd_a, lmd_d);
                 if(cost < min_cost){
@@ -207,77 +216,80 @@ double exact_repair(double* t, double lmd_a, double lmd_d, int interval_granular
             break;
         }
         if(find(eps_t_traversed, (eps_t + interval_granularity)) && (eps_t + interval_granularity) <= round_to_granularity(eps_md, interval_granularity) + interval_granularity){
-            double temp = eps_t + interval_granularity;
-            eps_t_traverse_range.push(temp);
+            long temp = eps_t + interval_granularity;
+            eps_t_traverse_range.push_back(temp);
         }
         if(find(eps_t_traversed, (eps_t - interval_granularity)) && (eps_t - interval_granularity) >= round_to_granularity(eps_md, interval_granularity) + interval_granularity){
-            double temp = eps_t - interval_granularity;
-            eps_t_traverse_range.push(temp);
+            long temp = eps_t - interval_granularity;
+            eps_t_traverse_range.push_back(temp);
         }
-        eps_t_traversed.push(eps_t);
-        if(sizeof(eps_t_traverse_range) == 0){
+        eps_t_traversed.push_back(eps_t);
+        if(eps_t_traverse_range.size() == 0){
             break;
         }
-        eps_t = eps_t_traverse_range.top();
-        eps_t_traverse_range.pop();
+        eps_t = eps_t_traverse_range.back();
+        eps_t_traverse_range.pop_back();
     }
     return min_eps_t, min_s_0, m_best;
 }
 
-double determine_interval(double* t, double interval_granularity){
-    double* eps_list;
-    double eps_md;
-    for(int i=0; i<=sizeof(t); i++){
-        eps_list[i] = t[i] - t[i-1];
+long determine_interval(vector<long> t, long interval_granularity){
+    // cout << "detrimine_interval" <<endl; 
+    vector<long> eps_list;
+    long eps_md;
+    for(int i=0; i<=t.size(); i++){
+        eps_list.push_back((long)t[i] - t[i-1]);
     }
-    if (sizeof(eps_list) % 2 == 0)
-        eps_md = (eps_list[sizeof(eps_list)/2 - 1] + eps_list[sizeof(eps_list)/2]) / 2;
+    int len = eps_list.size();//*(&eps_list + 1) - eps_list;
+    if (len % 2 == 0)
+        eps_md = (eps_list[len/2 - 1] + eps_list[len/2]) / 2;
     else
-        eps_md = eps_list[sizeof(eps_list)/2];
+        eps_md = eps_list[len/2];
     return round(eps_md / interval_granularity) * interval_granularity;
 }
 
-double start_point_approximation(double* t, double lmd_a=5, double lmd_d=5, double interval_granularity=1000){
-    int n = sizeof(t);
-    double eps_t = determine_interval(t, interval_granularity);
-    double s_0 = t[0];
-    double** dp;
-    double** op;
-    dp[0][0] = 0;
-    op[0][0] = 0;
-    int count = 0;
+long start_point_approximation(vector<long> t, long lmd_a=5, long lmd_d=5, long interval_granularity=1000){
+    // cout << "start_point_approximation" <<endl; 
+    int n = t.size();
+    long eps_t = determine_interval(t, interval_granularity);
+    long s_0 = t[0];
+    vector<vector<long>> dp;
+    vector<vector<long>> op;
     for(int i=0; i<=n; i++){
-        dp[i][count] = i * lmd_d;
-        op[i][count] = 2;
-        count+=1;
+        dp.push_back(vector<long>());
+        op.push_back(vector<long>());
+    }
+    dp[0].push_back(0);
+    op[0].push_back(0);
+    for(int i=0; i<=n; i++){
+        dp[i].push_back(i * lmd_d);
+        op[i].push_back(2);
     } 
     float m_best = 10e8;
     float m_ub = 10e8;
     float min_cost = 10e8;
     int m = 1;
-    double s_m, move_res, add_res, del_res;
+    long s_m, move_res, add_res, del_res;
     while(m <= m_ub){
-        dp[0][count] = m * lmd_a;
-        op[0][count] = 1;
-        for(int i=0; i<=n; i++){
+        dp[0].push_back(m * lmd_a);
+        op[0].push_back(1);
+        for(int i=1; i<n; i++){
             s_m = s_0 + (m - 1) * eps_t;
             move_res = dp[i - 1][m - 1] + abs(t[i - 1] - s_m);
             add_res = dp[i][m - 1] + lmd_a;
             del_res = dp[i - 1][m] + lmd_d;
-            int c = count;
             if(move_res <= add_res and move_res <= del_res){
-                dp[i][c] = move_res;
-                op[i][c] = 0;
+                dp[i].push_back(move_res);
+                op[i].push_back(0);
             }
             else if(add_res <= move_res and add_res <= del_res){
-                dp[i][c] = add_res;
-                op[i][c] = 1;
+                dp[i].push_back(add_res);
+                op[i].push_back(1);
             }
             else{
-                dp[i][c] = del_res;
-                op[i][c] = 2;
+                dp[i].push_back(del_res);
+                op[i].push_back(2);
             }
-            c+=1;
         }
         if(dp[n][m] < min_cost){
             min_cost = dp[n][m];
@@ -285,47 +297,51 @@ double start_point_approximation(double* t, double lmd_a=5, double lmd_d=5, doub
             m_ub = floor(min_cost / lmd_a) + n;
         }
         m += 1;
-        count += 1;
     }
     return min_cost, eps_t, s_0, m_best;
 }
 
-double median_approximation(double* t, double lmd_a=5, double lmd_d=5, double interval_granularity=1){
-    int n = sizeof(t);
-    double eps_t = determine_interval(t, interval_granularity);
+long median_approximation(vector<long> t, long lmd_a=5, long lmd_d=5, long interval_granularity=1){
+    // cout << "median approximation" <<endl; 
+    int n = t.size();
+    long eps_t = determine_interval(t, interval_granularity);
     int n_md = floor(n/2);
-    double s_md ;
-    if (sizeof(t) % 2 == 0)
-        s_md = (t[sizeof(t)/2 - 1] + t[sizeof(t)/2]) / 2;
+    long s_md ;
+    if (n % 2 == 0)
+        s_md = (t[n/2 - 1] + t[n/2]) / 2;
     else
-        s_md = t[sizeof(t)/2];
-    double** dp_l;
-    double** dp_r;
-    double** op_l;
-    double** op_r;
-    int count = 0;
-    dp_l[0][0] = 0;
-    op_l[0][0] = 0;
-    dp_r[0][0] = 0;
-    op_r[0][0] = 0;
+        s_md = t[n/2];
+    vector<vector<long>> dp_l;
+    vector<vector<long>> dp_r;
+    vector<vector<long>> op_l;
+    vector<vector<long>> op_r;
+    for(int i=0; i<=n; i++){
+        dp_l.push_back(vector<long>());
+        op_l.push_back(vector<long>());
+        dp_r.push_back(vector<long>());
+        op_r.push_back(vector<long>());
+    }
+    dp_l[0].push_back(0);
+    op_l[0].push_back(0);
+    dp_r[0].push_back(0);
+    op_r[0].push_back(0);
     for(int i=0; i<=n_md; i++){
-        dp_l[i][count] = i* lmd_d;
-        op_l[i][count] = 2;
-        dp_r[i][count] = i * lmd_d;
-        op_r[i][count] = 2;
-        count += 1;
+        dp_l[i].push_back(i * lmd_d);
+        op_l[i].push_back(2);
+        dp_r[i].push_back(i * lmd_d);
+        op_r[i].push_back(2);
     }
     float m_best = 10e8;
     float m_ub = 10e8;
     float min_cost = 10e8;
     int m = 1;
-    double s_m_l, s_m_r, t_i_l, t_i_r;
+    long s_m_l, s_m_r, t_i_l, t_i_r;
     while(m <= m_ub){
-        dp_l[0][count] = m*lmd_a;
-        op_l[0][count] = 1;
-        dp_r[0][count] = m * lmd_a;
-        op_r[0][count] = 1;
-        for(int i=0; i<=n_md; i++){
+        dp_l[0].push_back(m*lmd_a);
+        op_l[0].push_back(1);
+        dp_r[0].push_back(m * lmd_a);
+        op_r[0].push_back(1);
+        for(int i=1; i<n_md; i++){
             if(n % 2 == 1){
                 s_m_l = s_md - m * eps_t;
                 s_m_r = s_md + m * eps_t;
@@ -337,36 +353,38 @@ double median_approximation(double* t, double lmd_a=5, double lmd_d=5, double in
                 t_i_l = t[(int)(n / 2)-i];
                 t_i_r = t[(int)(n / 2)+i-1];
             }
-            double move_res_l = dp_l[i - 1][m - 1] + abs(t_i_l - s_m_l);
-            double move_res_r = dp_r[i - 1][m - 1] + abs(t_i_r - s_m_r);
-            double add_res_l = dp_l[i][m - 1] + lmd_a;
-            double add_res_r = dp_r[i][m - 1] + lmd_a;
-            double del_res_l = dp_l[i - 1][m] + lmd_d;
-            double del_res_r = dp_r[i - 1][m] + lmd_d;
-            double min_res_l = min({move_res_l, add_res_l, del_res_l});
+            long move_res_l = dp_l[i-1][m-1] + abs(t_i_l - s_m_l);
+            long move_res_r = dp_r[i-1][m-1] + abs(t_i_r - s_m_r);
+            long add_res_l = dp_l[i][m - 1] + lmd_a;
+            long add_res_r = dp_r[i][m - 1] + lmd_a;
+            long del_res_l = dp_l[i-1][m] + lmd_d;
+            long del_res_r = dp_r[i-1][m] + lmd_d;
+            long min_res_l = min({move_res_l, add_res_l, del_res_l});
+            // long temp = min(move_res_l, add_res_l);
+            // long min_res_l = min(temp, del_res_l);
             if(move_res_l == min_res_l){
-                dp_l[i][count] = move_res_l;
-                op_l[i][count] = 0;
+                dp_l[i].push_back(move_res_l);
+                op_l[i].push_back(0);
             }
             else if(add_res_l == min_res_l){
-                dp_l[i][count] = add_res_l;
-                op_l[i][count] = 1;
+                dp_l[i].push_back(add_res_l);
+                op_l[i].push_back(1);
             } else {
-                dp_l[i][count] = del_res_l;
-                op_l[i][count] = 2;
+                dp_l[i].push_back(del_res_l);
+                op_l[i].push_back(2);
             }
-            double min_res_r = min({move_res_r, add_res_r, del_res_r});
+            long min_res_r = min({move_res_r, add_res_r, del_res_r});
             if(move_res_r == min_res_r){
-                dp_r[i][count] = move_res_r;
-                op_r[i][count] = 0;
+                dp_r[i].push_back(move_res_r);
+                op_r[i].push_back(0);
             }
             else if(add_res_r == min_res_r){
-                dp_r[i][count] = add_res_r;
-                op_r[i][count] = 1;
+                dp_r[i].push_back(add_res_r);
+                op_r[i].push_back(1);
             }
             else {
-                dp_r[i][count] = del_res_r;
-                op_r[i][count] = 2;
+                dp_r[i].push_back(del_res_r);
+                op_r[i].push_back(2);
             }
         }
         if(dp_r[n_md][m] + dp_l[n_md][m] < min_cost){
@@ -379,7 +397,7 @@ double median_approximation(double* t, double lmd_a=5, double lmd_d=5, double in
         }
         m += 1;
     }
-    double s_0;
+    long s_0;
     if(n % 2 == 1){
         s_0 = s_md - m_best * eps_t;
         m = m_best * 2 + 1;
@@ -391,187 +409,136 @@ double median_approximation(double* t, double lmd_a=5, double lmd_d=5, double in
     return min_cost, eps_t, s_0, m;
 }
 
-// double** trace_back(double** op, double* t, double s_0, double eps_t, double m_best){
-//     int n = sizeof(t);
-//     // vector<int> M;
-//     double** M;
-//     int i = n - 1;
-//     int j = m_best - 1;
-//     int count = 0;
-//     while(i >= 0 && j >= 0){
-//         if(op[i][j] == 0){
-//             M[count][0] = i;
-//             M[count][1] = j;
-//             i = i - 1;
-//             j = j - 1;
-//         } else if(op[i][j] == 1){
-//             M[count][0] = -1;
-//             M[count][1] = j;
-//             j = j - 1;
-//         } else{
-//             M[count][0] = i;
-//             M[count][1] = -1;
-//             i = i - 1;
-//         }  
-//         count += 1;
-//     }
-//     // M = reverse(M.begin(), M.end());
-//     return M;
-// }
-
-double median_approximation_all(double* t, double  lmd_a=5, double lmd_d=5, double interval_granularity=1){
-    double median_min_cost, median_eps_t, median_s_0, median_m = median_approximation(t, lmd_a, lmd_d, interval_granularity);
-    double sp_min_cost, sp_eps_t, sp_median_s_0, sp_m = start_point_approximation(t, lmd_a, lmd_d, interval_granularity);
+long median_approximation_all(vector<long> t, long  lmd_a=5, long lmd_d=5, long interval_granularity=1){
+    // cout << "median_approximation_all" <<endl; 
+    long median_min_cost, median_eps_t, median_s_0, median_m = median_approximation(t, lmd_a, lmd_d, interval_granularity);
+    long sp_min_cost, sp_eps_t, sp_median_s_0, sp_m = start_point_approximation(t, lmd_a, lmd_d, interval_granularity);
     if(median_min_cost <= sp_min_cost)
         return median_eps_t, median_s_0, median_m;
     else
         return sp_eps_t, sp_median_s_0, sp_m;
 }
 
-double* equal_series_generate(double eps_t, double s_0, double m) {
-    double* ret;
-    for(int i = 0; i <= m; i++){
-        ret[i] = s_0 + i*eps_t;
+vector<long> equal_series_generate(long eps_t, long s_0, long m=100) {
+    // cout << "equal_series_generate" <<endl; 
+    vector<long> ret;
+    for(int i = 0; i < m; i++){
+        ret.push_back((long)(s_0 + i*eps_t));
     }
     return ret;
 }
 
-double cal_cost(double* truth, double* repair, double lmd_a, double lmd_d) {
+long cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d) {
+    // cout << "cal_cost" <<endl; 
     lmd_a = 5;
     lmd_d = 5;
-    double* s1 = repair;
-    double* s2 = truth;
-    int n = sizeof(s1);
-    int m = sizeof(s2);
-    double** dp;
+    vector<long> s1;
+    for(int i=0; i<=repair.size(); i++){
+        s1.push_back(repair[i]);
+    }
+    vector<long> s2;
+    for(int i=0; i<=truth.size(); i++){
+        s2.push_back(truth[i]);
+    }
+    int n = s1.size();
+    int m = s2.size();
+    vector<vector<long>> dp;
+    for(int i=0; i<=n+m; i++){
+        dp.push_back(vector<long>());
+    }
     lmd_a = lmd_a * (truth[1] - truth[0]);
     lmd_d = lmd_d * (truth[1] - truth[0]);
     for(int i=1; i<=n+1; i++){
-        dp[i][0] = i*lmd_d;
+        dp[i].push_back(i*lmd_d);
     }
     for(int j=1; j<=m+1; j++){
-        dp[0][0] = j*lmd_a;
+        dp[0].push_back(j*lmd_a);
         for(int i=1; i<=n+1; i++){
-            double s_m = s2[j-1];
-            double move_res = dp[i-1][j-1] + abs(s1[i-1]-s_m);
-            double add_res = dp[i][j-1] + lmd_a;
-            double del_res = dp[i-1][j] + lmd_d;
+            long s_m = s2[j-1];
+            long move_res = dp[i-1][j-1] + abs(s1[i-1]-s_m);
+            long add_res = dp[i][j-1] + lmd_a;
+            long del_res = dp[i-1][j] + lmd_d;
             if(move_res <= add_res and move_res <= del_res) {
-                dp[i][0] = move_res;
+                dp[i].push_back(move_res);
             }
             else if(add_res <= move_res and add_res <= del_res) {
-                dp[i][0] = add_res;
+                dp[i].push_back(add_res);
             }
             else {
-                dp[i][0] = del_res;
+                dp[i].push_back(del_res);
             }
         }
     }
-    double res = dp[n][m];
+    long res = dp[n][m];
     return res;
 }
 
-double cal_rmse(double* tuth, double* repir) {
-    int min_len = min(sizeof(tuth), sizeof(repir));
-    double* truth;
-    double* repair;
-    double* diff;
-    double res;
-    double sum = 0;
+long cal_rmse(vector<long> truth, vector<long> repair) {
+    // cout << "cal_rmse" <<endl; 
+    int min_len = min(truth.size(), repair.size());
+    vector<long> diff;
+    long res;
+    long sum = 0;
     for(int i=0; i<=min_len; i++){
-        truth[i] = tuth[i];
-        repair[i] = repir[i];
-    }
-    for(int i=0; i<=min_len; i++){
-        diff[i] = pow(abs(truth[i] - repair[i]), 2);
+        diff.push_back((long)pow(abs(truth[i] - repair[i]), 2));
         sum += diff[i];
     }
-    res = sqrt(sum / sizeof(diff));
+    res = sqrt(sqrt(sum / diff.size()));
     return res;
 }
 
-double calAccuracy(double* tuth, double* falt, double* repir) {
+long calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair) {
+    // cout << "calAccuracy" <<endl; 
     int min_len;
-    int x = sizeof(tuth);
-    int y = sizeof(falt);
-    int z = sizeof(repir);
-    min_len = min({x, y, z});
-    double* truth;
-    double* repair;
-    double* fault;
-    double* diff;
-    double error = 0;
-    double cost = 0;
-    double inject;
+    min_len = min({truth.size(), fault.size(), repair.size()});
+    vector<long> diff;
+    long error = 0;
+    long cost = 0;
+    long inject = 0;
     for(int i=0; i<=min_len; i++){
-        truth[i] = tuth[i];
-        repair[i] = repir[i];
-        fault[i] = falt[i];
-    }
-    for(int i=0; i<=min_len; i++){
-        diff[i] = abs(truth[i] - repair[i]);
+        diff.push_back((long)abs(truth[i] - repair[i]));
         error += diff[i];
     }
     for(int i=0; i<=min_len; i++){
-        diff[i] = abs(fault[i] - repair[i]);
+        diff.push_back((long)abs(fault[i] - repair[i]));
         cost += diff[i];
     }
     for(int i=0; i<=min_len; i++){
-        diff[i] = abs(truth[i] - fault[i]);
+        diff.push_back((long)abs(truth[i] - fault[i]));
         inject += diff[i];
     }
     if(error == 0){
         return 1;
     }
-    double ret = (1 - (error / (cost + inject)));
+    long ret = (1 - (error / (cost + inject)))*100;
     return ret;
 }
 
-double calDTW(double* s1, double* s2){
-    int m = sizeof(s1);
-    int n = sizeof(s2);
-    double** dp;
-    for(int i=0; i<=m; i++){
-        dp[i][0] = abs(s1[i] - s2[0]);
-    }
-    for(int j=0; j<=n; j++){
-        dp[0][j] = abs(s1[0] - s2[j]);
-    }
-    for(int j=1; j<=n; j++){
-        for(int i=1; i<=m; i++){
-            dp[i][j] = min({dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]}) + abs(s1[i] - s2[j]);
-        }
-    }
-    double ret = dp[-1][-1];
-    return ret;
-}
 
-double metric_res(double* repair, double* truth, double* fault, string metric_name){
-    metric_name="cost";
+long metric_res(vector<long> repair, vector<long> truth, vector<long> fault, string metric_name){
+    // cout << "metric_res" <<endl;
+    repair = fault;
     if(metric_name == "cost"){
-        double lmd_a = 5 * (truth[1] - truth[0]);
-        double lmd_d = 5 * (truth[1] - truth[0]);
+        long lmd_a = 5 * (truth[1] - truth[0]);
+        long lmd_d = 5 * (truth[1] - truth[0]);
         return cal_cost(truth, repair, lmd_a, lmd_d);
-    } else if(metric_name == "dtw") {
-        return calDTW(truth, repair);
     } else if(metric_name == "accuracy") {
         return calAccuracy(truth, fault, repair);
-    } else {
+    } else if(metric_name == "rmse") {
         return cal_rmse(truth, repair);
+        // return cal_rmse(truth, fault);
     }
+    return 0;
 }
 
-int main(){
-    // double match_search = match_searching();  
-    // double** trace = trace_back();  
-    // double exact_repr = exact_repair();  
+int main(){ 
     string version = "-test";
     string datasets = "energy";
     string methods = "exact"; //aproximate
     vector<vector<string>> content;
     vector<string> row;
     string line, word;
-    map<string, double> result_dfs = {};
+    map<string, long> result_dfs = {};
 
     result_dfs["rmse"] = {0};
     result_dfs["time"] = {0};
@@ -585,91 +552,70 @@ int main(){
     int interval_granularity = 1;
     int lmd_a = 100;
     int lmd_d = 100;
-    double eps_t_e, s_0_e, m_e;
-    double eps_t_a, s_0_a, m_a;
+    long eps_t_e, s_0_e, m_e;
+    long eps_t_a, s_0_a, m_a;
     int bias_d = 1;
     int bias_s = 3;
-    // map<string, double> result_map = {};
-    // result_map["exact-rmse"] = 0;
-    // result_map["exact-time"] = 0;
-    double result_rmse = 0;
-    string dataset_path = "../result/energy";
+    long result_exact_rmse = 0;
+    long result_approx_rmse = 0;
     for(int ts = 0; ts<file_counts; ts++){
-        string file_name = "../data/dirty_energy/series_0.csv";
-        string data_truth = "../data/energy/series_0.csv";
-        double* original_seq;
-        double* file_rows_2;
-        double* ground_truth_seq;
-        double* data_rows_2;
-        string metric = "cost";
-        double** data_rows;
+        string file_name = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\dirty_energy_test\\series_0.csv";
+        string data_truth = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\energy_test\\series_0.csv";
+        vector<long> original_seq;
+        vector<long> ground_truth_seq;
+        vector<vector<long>> data_rows;
+
         int cnt = 0;
-
-        fstream file(file_name, ios::in);
-        fstream data(data_truth, ios::in);
-
-        if (file.is_open())
-        {
-            while (getline(file, line))
-            {
-                row.clear();
-
-                stringstream str(line);
-
-                while (getline(str, word, ','))
-                    row.push_back(word);
-                    cout << row[0] << endl;
-                    cout << row[1] << endl;
-                    cout << row[2] << endl;
-                    original_seq[cnt] = stol(row[1]);
-                    file_rows_2[cnt] = stol(row[2]);
-                    cnt += 1;
-                content.push_back(row);
-            }
-        }
-        else {
-            cout << "Could not open the file\n";
+        long* original_sq;
+        ifstream inputFile1;
+        inputFile1.open(file_name);
+        getline(inputFile1, line);
+        line = "";
+        while(getline(inputFile1, line)){
+            string first_column;
+            string second_column;
+            stringstream inputString(line);
+            getline(inputString, first_column, ',');
+            getline(inputString, second_column);
+            original_seq.push_back(stol(second_column));
+            cnt += 1;
+            line = "";
         }
         cnt = 0;
-        if (data.is_open())
-        {
-            while (getline(data, line))
-            {
-                row.clear();
-
-                stringstream str(line);
-
-                while (getline(str, word, ','))
-                    row.push_back(word);
-                    cout << row[0] << endl;
-                    cout << row[1] << endl;
-                    cout << row[2] << endl;
-                    ground_truth_seq[cnt] = stol(row[1]);
-                    file_rows_2[cnt] = stol(row[2]);
-                    cnt += 1;
-                content.push_back(row);
-            }
-        }
-        else {
-            cout << "Could not open the file\n";
+        long* truth_sq;
+        ifstream inputFile2;
+        inputFile2.open(data_truth);
+        getline(inputFile2, line);
+        line = "";
+        while(getline(inputFile2, line)){
+            string first_column;
+            string second_column;
+            string thrid_column;
+            stringstream inputString(line);
+            getline(inputString, first_column, ',');
+            getline(inputString, second_column, ',');
+            getline(inputString, thrid_column);
+            ground_truth_seq.push_back(stol(second_column));
+            cnt += 1;
+            line = "";
         }
 
-        double source_values = 0;
-        double time_scale;
+        // cout << original_seq[23];
+
+        long source_values = 0;
+        long time_scale;
         
         eps_t_e, s_0_e, m_e = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
-        
         eps_t_a, s_0_a, m_a = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
 
-        double* exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
-        double* appro_res = equal_series_generate(eps_t_a, s_0_a, m_a);
+        vector<long> exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
+        // vector<long> appro_res = equal_series_generate(eps_t_a, s_0_a, m_a);
 
-        result_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
-        // result_map["exact-time"] = exact_time;
-        // result_map["approximate-rmse"] = metric_res(appro_res, truth, original, metric);
-        // result_map["approximate-time"] = appro_time;
+        string metric = "rmse"; //rmse cost accuracy
+        result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+        // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
     }
-    cout << result_rmse <<endl;      
-    // cout << result_time <<endl;   
+    cout << result_exact_rmse <<endl;      
+    // cout << result_approx_rmse <<endl;   
     return 0;
 }
