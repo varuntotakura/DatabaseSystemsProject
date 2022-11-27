@@ -11,6 +11,8 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
+#include <time.h>
+#include <sstream>
 // #include "Functions\exact.h"
 // #include "Functions\metrics.h"
 
@@ -341,7 +343,7 @@ double median_approximation(double* t, double lmd_a=5, double lmd_d=5, double in
             double add_res_r = dp_r[i][m - 1] + lmd_a;
             double del_res_l = dp_l[i - 1][m] + lmd_d;
             double del_res_r = dp_r[i - 1][m] + lmd_d;
-            double min_res_l = min(move_res_l, add_res_l, del_res_l);
+            double min_res_l = min({move_res_l, add_res_l, del_res_l});
             if(move_res_l == min_res_l){
                 dp_l[i][count] = move_res_l;
                 op_l[i][count] = 0;
@@ -353,7 +355,7 @@ double median_approximation(double* t, double lmd_a=5, double lmd_d=5, double in
                 dp_l[i][count] = del_res_l;
                 op_l[i][count] = 2;
             }
-            double min_res_r = min(move_res_r, add_res_r, del_res_r);
+            double min_res_r = min({move_res_r, add_res_r, del_res_r});
             if(move_res_r == min_res_r){
                 dp_r[i][count] = move_res_r;
                 op_r[i][count] = 0;
@@ -389,33 +391,33 @@ double median_approximation(double* t, double lmd_a=5, double lmd_d=5, double in
     return min_cost, eps_t, s_0, m;
 }
 
-double** trace_back(double** op, double* t, double s_0, double eps_t, double m_best){
-    int n = sizeof(t);
-    // vector<int> M;
-    double** M;
-    int i = n - 1;
-    int j = m_best - 1;
-    int count = 0;
-    while(i >= 0 && j >= 0){
-        if(op[i][j] == 0){
-            M[count][0] = i;
-            M[count][1] = j;
-            i = i - 1;
-            j = j - 1;
-        } else if(op[i][j] == 1){
-            M[count][0] = -1;
-            M[count][1] = j;
-            j = j - 1;
-        } else{
-            M[count][0] = i;
-            M[count][1] = -1;
-            i = i - 1;
-        }  
-        count += 1;
-    }
-    // M = reverse(M.begin(), M.end());
-    return M;
-}
+// double** trace_back(double** op, double* t, double s_0, double eps_t, double m_best){
+//     int n = sizeof(t);
+//     // vector<int> M;
+//     double** M;
+//     int i = n - 1;
+//     int j = m_best - 1;
+//     int count = 0;
+//     while(i >= 0 && j >= 0){
+//         if(op[i][j] == 0){
+//             M[count][0] = i;
+//             M[count][1] = j;
+//             i = i - 1;
+//             j = j - 1;
+//         } else if(op[i][j] == 1){
+//             M[count][0] = -1;
+//             M[count][1] = j;
+//             j = j - 1;
+//         } else{
+//             M[count][0] = i;
+//             M[count][1] = -1;
+//             i = i - 1;
+//         }  
+//         count += 1;
+//     }
+//     // M = reverse(M.begin(), M.end());
+//     return M;
+// }
 
 double median_approximation_all(double* t, double  lmd_a=5, double lmd_d=5, double interval_granularity=1){
     double median_min_cost, median_eps_t, median_s_0, median_m = median_approximation(t, lmd_a, lmd_d, interval_granularity);
@@ -424,16 +426,6 @@ double median_approximation_all(double* t, double  lmd_a=5, double lmd_d=5, doub
         return median_eps_t, median_s_0, median_m;
     else
         return sp_eps_t, sp_median_s_0, sp_m;
-}
-
-double* time2ts(double* seq, double time_scale){
-    double* ts_list;
-    for(int i = 0; i <= sizeof(seq); i++){
-        time_t timeArray = datetime.strptime(seq[i], "%Y-%m-%d %H:%M:%S.%f");
-        time_t timeStamp = float(timeArray.timestamp()) * time_scale;
-        ts_list[i] = timeStamp;
-    }
-    return ts_list;
 }
 
 double* equal_series_generate(double eps_t, double s_0, double m) {
@@ -499,7 +491,11 @@ double cal_rmse(double* tuth, double* repir) {
 }
 
 double calAccuracy(double* tuth, double* falt, double* repir) {
-    int min_len = min(sizeof(tuth), sizeof(falt), sizeof(repir));
+    int min_len;
+    int x = sizeof(tuth);
+    int y = sizeof(falt);
+    int z = sizeof(repir);
+    min_len = min({x, y, z});
     double* truth;
     double* repair;
     double* fault;
@@ -543,7 +539,7 @@ double calDTW(double* s1, double* s2){
     }
     for(int j=1; j<=n; j++){
         for(int i=1; i<=m; i++){
-            dp[i][j] = min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]) + abs(s1[i] - s2[j]);
+            dp[i][j] = min({dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]}) + abs(s1[i] - s2[j]);
         }
     }
     double ret = dp[-1][-1];
@@ -551,7 +547,7 @@ double calDTW(double* s1, double* s2){
 }
 
 double metric_res(double* repair, double* truth, double* fault, string metric_name){
-    string metric_name="cost";
+    metric_name="cost";
     if(metric_name == "cost"){
         double lmd_a = 5 * (truth[1] - truth[0]);
         double lmd_d = 5 * (truth[1] - truth[0]);
@@ -572,7 +568,6 @@ int main(){
     string version = "-test";
     string datasets = "energy";
     string methods = "exact"; //aproximate
-    bool data_characteristic = false;
     vector<vector<string>> content;
     vector<string> row;
     string line, word;
@@ -661,16 +656,8 @@ int main(){
 
         double source_values = 0;
         double time_scale;
-        if(time_scale){
-            original_seq = time2ts(original_seq, time_scale);
-            ground_truth_seq = time2ts(ground_truth_seq, time_scale);
-        }
-
-        if (data_characteristic){
-            eps_t_e, s_0_e, m_e = exact_repair_v(original_seq, source_values, lmd_a, lmd_d, interval_granularity, start_point_granularity);
-        } else {
+        
         eps_t_e, s_0_e, m_e = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
-        }
         
         eps_t_a, s_0_a, m_a = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
 
