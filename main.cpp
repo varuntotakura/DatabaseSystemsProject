@@ -487,7 +487,7 @@ long cal_rmse(vector<long> truth, vector<long> repair) {
     return res;
 }
 
-long calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair) {
+float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair) {
     // cout << "calAccuracy" <<endl; 
     int min_len;
     min_len = min({truth.size(), fault.size(), repair.size()});
@@ -510,7 +510,7 @@ long calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair) {
     if(error == 0){
         return 1;
     }
-    long ret = (1 - (error / (cost + inject)))*100;
+    float ret = (1 - (error / (cost + inject)));
     return ret;
 }
 
@@ -523,7 +523,7 @@ long metric_res(vector<long> repair, vector<long> truth, vector<long> fault, str
         long lmd_d = 5 * (truth[1] - truth[0]);
         return cal_cost(truth, repair, lmd_a, lmd_d);
     } else if(metric_name == "accuracy") {
-        return calAccuracy(truth, fault, repair);
+        return calAccuracy(truth, fault, repair)*10;
     } else if(metric_name == "rmse") {
         return cal_rmse(truth, repair);
         // return cal_rmse(truth, fault);
@@ -532,22 +532,8 @@ long metric_res(vector<long> repair, vector<long> truth, vector<long> fault, str
 }
 
 int main(){ 
-    string version = "-test";
-    string datasets = "energy";
-    string methods = "exact"; //aproximate
-    vector<vector<string>> content;
     vector<string> row;
     string line, word;
-    map<string, long> result_dfs = {};
-
-    result_dfs["rmse"] = {0};
-    result_dfs["time"] = {0};
-
-    int file_counts = 5;
-    int truth_col = 1;
-    string truth_dir = "../data/energy";
-    int original_col = 1;
-    string original_dir = "../data/dirty_energy";
     int start_point_granularity = 1;
     int interval_granularity = 1;
     int lmd_a = 100;
@@ -558,63 +544,71 @@ int main(){
     int bias_s = 3;
     long result_exact_rmse = 0;
     long result_approx_rmse = 0;
-    for(int ts = 0; ts<file_counts; ts++){
-        string file_name = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\dirty_energy_test\\series_0.csv";
-        string data_truth = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\energy_test\\series_0.csv";
-        vector<long> original_seq;
-        vector<long> ground_truth_seq;
-        vector<vector<long>> data_rows;
-
-        int cnt = 0;
-        long* original_sq;
-        ifstream inputFile1;
-        inputFile1.open(file_name);
-        getline(inputFile1, line);
+    string file_name = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\dirty_energy_test\\series_1.csv";
+    string data_truth = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\energy_test\\series_1.csv";
+    vector<long> original_seq;
+    vector<long> ground_truth_seq;
+    string metric;
+    int cnt = 0;
+    long* original_sq;
+    ifstream inputFile1;
+    inputFile1.open(file_name);
+    getline(inputFile1, line);
+    line = "";
+    while(getline(inputFile1, line)){
+        string first_column;
+        string second_column;
+        stringstream inputString(line);
+        getline(inputString, first_column, ',');
+        getline(inputString, second_column);
+        original_seq.push_back(stol(second_column));
+        cnt += 1;
         line = "";
-        while(getline(inputFile1, line)){
-            string first_column;
-            string second_column;
-            stringstream inputString(line);
-            getline(inputString, first_column, ',');
-            getline(inputString, second_column);
-            original_seq.push_back(stol(second_column));
-            cnt += 1;
-            line = "";
-        }
-        cnt = 0;
-        long* truth_sq;
-        ifstream inputFile2;
-        inputFile2.open(data_truth);
-        getline(inputFile2, line);
-        line = "";
-        while(getline(inputFile2, line)){
-            string first_column;
-            string second_column;
-            string thrid_column;
-            stringstream inputString(line);
-            getline(inputString, first_column, ',');
-            getline(inputString, second_column, ',');
-            getline(inputString, thrid_column);
-            ground_truth_seq.push_back(stol(second_column));
-            cnt += 1;
-            line = "";
-        }
-
-        // cout << original_seq[23];
-
-        long source_values = 0;
-        long time_scale;
-        
-        eps_t_e, s_0_e, m_e = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
-        eps_t_a, s_0_a, m_a = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
-
-        vector<long> exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
-        // vector<long> appro_res = equal_series_generate(eps_t_a, s_0_a, m_a);
-
-        string metric = "rmse"; //rmse cost accuracy
-        result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
-        // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
     }
+    cnt = 0;
+    long* truth_sq;
+    ifstream inputFile2;
+    inputFile2.open(data_truth);
+    getline(inputFile2, line);
+    line = "";
+    while(getline(inputFile2, line)){
+        string first_column;
+        string second_column;
+        string thrid_column;
+        stringstream inputString(line);
+        getline(inputString, first_column, ',');
+        getline(inputString, second_column, ',');
+        getline(inputString, thrid_column);
+        ground_truth_seq.push_back(stol(second_column));
+        cnt += 1;
+        line = "";
+    }
+    long source_values = 0;
+    long time_scale;
+    eps_t_e, s_0_e, m_e = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
+    eps_t_a, s_0_a, m_a = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
+
+    vector<long> exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
+    // vector<long> appro_res = equal_series_generate(eps_t_a, s_0_a, m_a);
+
+    cout << "Accuarcy: ";
+    metric = "accuracy";
+    result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+    // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
+    cout << result_exact_rmse <<endl;      
+    // cout << result_approx_rmse <<endl;  
+
+    cout << "RMSE: ";
+    metric = "rmse";
+    result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+    // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
+    cout << result_exact_rmse <<endl;      
+    // cout << result_approx_rmse <<endl;  
+
+    cout << "Cost: ";
+    metric = "cost";
+    result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+    // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
     cout << result_exact_rmse <<endl;      
     // cout << result_approx_rmse <<endl;   
     return 0;
