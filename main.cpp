@@ -13,6 +13,7 @@
 #include <ctime>
 #include <time.h>
 #include <array> 
+#include <tuple>
 // #include "Functions\exact.h"
 // #include "Functions\metrics.h"
 
@@ -428,7 +429,7 @@ vector<long> equal_series_generate(long eps_t, long s_0, long m=100) {
     return ret;
 }
 
-long cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d) {
+float cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d) {
     // cout << "cal_cost" <<endl; 
     lmd_a = 5;
     lmd_d = 5;
@@ -469,21 +470,23 @@ long cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d) {
             }
         }
     }
-    long res = dp[n][m];
+    float res = dp[n][m];
     return res;
 }
 
-long cal_rmse(vector<long> truth, vector<long> repair) {
+float cal_rmse(vector<long> truth, vector<long> repair) {
     // cout << "cal_rmse" <<endl; 
     int min_len = min(truth.size(), repair.size());
     vector<long> diff;
-    long res;
+    float res;
     long sum = 0;
+    int cnt = 0;
     for(int i=0; i<=min_len; i++){
-        diff.push_back((long)pow(abs(truth[i] - repair[i]), 2));
+        diff.push_back((long)sqrt(abs(truth[i] - repair[i])));
         sum += diff[i];
+        cnt += diff.size();
     }
-    res = sqrt(sqrt(sum / diff.size()));
+    res = sqrt(sum / cnt+1);
     return res;
 }
 
@@ -515,7 +518,7 @@ float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair) {
 }
 
 
-long metric_res(vector<long> repair, vector<long> truth, vector<long> fault, string metric_name){
+float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, string metric_name){
     // cout << "metric_res" <<endl;
     repair = fault;
     if(metric_name == "cost"){
@@ -523,10 +526,9 @@ long metric_res(vector<long> repair, vector<long> truth, vector<long> fault, str
         long lmd_d = 5 * (truth[1] - truth[0]);
         return cal_cost(truth, repair, lmd_a, lmd_d);
     } else if(metric_name == "accuracy") {
-        return calAccuracy(truth, fault, repair)*10;
+        return calAccuracy(truth, fault, repair);
     } else if(metric_name == "rmse") {
         return cal_rmse(truth, repair);
-        // return cal_rmse(truth, fault);
     }
     return 0;
 }
@@ -544,8 +546,8 @@ int main(){
     int bias_s = 3;
     long result_exact_rmse = 0;
     long result_approx_rmse = 0;
-    string file_name = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\dirty_energy_test\\series_1.csv";
-    string data_truth = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\energy_test\\series_1.csv";
+    string file_name = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\dirty_energy_test\\series_3.csv";
+    string data_truth = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\energy_test\\series_3.csv";
     vector<long> original_seq;
     vector<long> ground_truth_seq;
     string metric;
@@ -591,12 +593,12 @@ int main(){
     vector<long> exact_res = equal_series_generate(eps_t_e, s_0_e, m_e);
     // vector<long> appro_res = equal_series_generate(eps_t_a, s_0_a, m_a);
 
-    cout << "Accuarcy: ";
-    metric = "accuracy";
-    result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
-    // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-    cout << result_exact_rmse <<endl;      
-    // cout << result_approx_rmse <<endl;  
+    // cout << "Accuarcy: ";
+    // metric = "accuracy";
+    // result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+    // // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
+    // cout << result_exact_rmse <<endl;      
+    // // cout << result_approx_rmse <<endl;  
 
     cout << "RMSE: ";
     metric = "rmse";
@@ -605,11 +607,11 @@ int main(){
     cout << result_exact_rmse <<endl;      
     // cout << result_approx_rmse <<endl;  
 
-    cout << "Cost: ";
-    metric = "cost";
-    result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
-    // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-    cout << result_exact_rmse <<endl;      
-    // cout << result_approx_rmse <<endl;   
+    // cout << "Cost: ";
+    // metric = "cost";
+    // result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+    // // result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
+    // cout << result_exact_rmse <<endl;      
+    // // cout << result_approx_rmse <<endl;   
     return 0;
 }
