@@ -1,0 +1,191 @@
+File: 1
+Generating Values
+RMSE:
+Exact:6
+Approx:51
+Accuarcy:
+Exact:0.997666
+Approx:0.980482
+Cost:
+Exact:23682
+Approx:35814
+
+File: 2
+Generating Values
+RMSE:
+Exact:1
+Approx:2
+Accuarcy:
+Exact:0.99974
+Approx:0.999479
+Cost:
+Exact:3947
+Approx:7894
+
+File: 3
+Generating Values
+RMSE:
+Exact:3
+Approx:60
+Accuarcy:
+Exact:0.998895
+Approx:0.978348
+Cost:
+Exact:11841
+Approx:300
+
+File: 4
+Generating Values
+RMSE:
+Exact:14
+Approx:2262.8
+Accuarcy:
+Exact:0.994604
+Approx:0.00323027
+Cost:
+Exact:55258
+Approx:77986
+
+File: 5
+Generating Values
+RMSE:
+Exact:3
+Approx:3
+Accuarcy:
+Exact:0.998536
+Approx:0.998536
+Cost:
+Exact:11841
+Approx:11841
+
+
+Dataset: air_quality
+File: 1
+Generating Values
+RMSE:
+Exact:4
+Approx:3
+Accuarcy:
+Exact:0.528258
+Approx:0.619464
+Cost:
+Exact:37428
+Approx:28071
+
+Dataset: air_quality
+File: 2
+Generating Values
+RMSE:
+Exact:4
+Approx:0
+Accuarcy:
+Exact:0.528899
+Approx:1
+Cost:
+Exact:37428
+Approx:0
+
+Dataset: air_quality
+File: 3
+Generating Values
+RMSE:
+Exact:0
+Approx:0
+Accuarcy:
+Exact:1
+Approx:1
+Cost:
+Exact:0
+Approx:0
+
+Dataset: air_quality
+File: 4
+Generating Values
+RMSE:
+Exact:4
+Approx:6
+Accuarcy:
+Exact:0.533468
+Approx:0.390662
+Cost:
+Exact:37428
+Approx:56142
+
+Dataset: air_quality
+File: 5
+Generating Values
+RMSE:
+Exact:0
+Approx:0
+Accuarcy:
+Exact:1
+Approx:1
+Cost:
+Exact:0
+Approx:0
+
+Dataset: pm
+File: 1
+Generating Values
+RMSE:
+Exact:0
+Approx:1
+Accuarcy:
+Exact:1
+Approx:0.888765
+Cost:
+Exact:0
+Approx:8760
+
+Dataset: pm
+File: 2
+Generating Values
+RMSE:
+Exact:2
+Approx:3
+Accuarcy:
+Exact:0.768493
+Approx:0.60789
+Cost:
+Exact:17520
+Approx:26280
+
+Dataset: pm
+File: 3
+Generating Values
+RMSE:
+Exact:0
+Approx:2
+Accuarcy:
+Exact:1
+Approx:0.731856
+Cost:
+Exact:0
+Approx:17520
+
+Dataset: pm
+File: 4
+Generating Values
+RMSE:
+Exact:6
+Approx:7
+Accuarcy:
+Exact:0.33308
+Approx:0.27779
+Cost:
+Exact:52560
+Approx:61320
+
+Dataset: pm
+File: 5
+Generating Values
+RMSE:
+Exact:4
+Approx:4
+Accuarcy:
+Exact:0.527788
+Approx:0.527788
+Cost:
+Exact:35040
+Approx:35040
+

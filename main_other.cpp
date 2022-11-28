@@ -725,7 +725,7 @@ int main()
         string file_name = "./data/"+files[d_set]+"/series_"+to_string(filecount)+".csv";
         if(filecount>=4){
             d_set+=1;
-            filecount = 0;
+            filecount = -1;
         }
         vector<long> original_seq;
         vector<long> ground_truth_seq;
