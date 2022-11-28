@@ -1,5 +1,4 @@
-# DatabaseSystemsProject
-Time-Series Data Fixing using C++
+# Time-Series Data Fixing using C++
 
 ## How to run:
 
