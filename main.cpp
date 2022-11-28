@@ -561,7 +561,6 @@ MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a = 5, 
     MedianApproximation median_approx;
     StartPointApproximation start_point_approx;
     median_approx = median_approximation(t, lmd_a, lmd_d, interval_granularity);
-    long sp_min_cost, sp_eps_t, sp_median_s_0, sp_m;
     start_point_approx = start_point_approximation(t, lmd_a, lmd_d, interval_granularity);
     MedianApproximationAll median_approx_all;
     if (median_approx.min_cost <= start_point_approx.min_cost)
@@ -569,15 +568,14 @@ MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a = 5, 
         median_approx_all.eps_t = median_approx.eps_t;
         median_approx_all.s_0 = median_approx.s_0;
         median_approx_all.m = median_approx.m;
-        return median_approx_all;
     }
     else
     {
         median_approx_all.eps_t = start_point_approx.eps_t;
         median_approx_all.s_0 = start_point_approx.s_0;
         median_approx_all.m = start_point_approx.m_best;
-        return median_approx_all;
     }
+    return median_approx_all;
 }
 
 vector<long> equal_series_generate(long eps_t, long s_0, long m = 100)
@@ -647,12 +645,12 @@ float cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d)
     return res;
 }
 
-double cal_rmse(vector<long> truth, vector<long> repair)
+float cal_rmse(vector<long> truth, vector<long> repair)
 {
     // cout << "cal_rmse" <<endl;
     int min_len = min(truth.size(), repair.size());
     vector<long> diff;
-    double res;
+    float res;
     long long sum = 0;
     for (int i = 0; i < min_len; i++)
     {
@@ -667,9 +665,9 @@ float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair)
     // cout << "calAccuracy" <<endl;
     int min_len;
     min_len = min({truth.size(), fault.size(), repair.size()});
-    long error = 0;
-    long cost = 0;
-    long inject = 0;
+    float error = 0;
+    float cost = 0;
+    float inject = 0;
     for (int i = 0; i < min_len; i++)
     {
         error += (long)abs(truth[i] - repair[i]);
@@ -693,7 +691,6 @@ float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair)
 float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, string metric_name)
 {
     // cout << "metric_res" <<endl;
-    // repair = fault;
     if (metric_name == "cost")
     {
         long lmd_a = 5 * (truth[1] - truth[0]);
@@ -721,12 +718,12 @@ int main()
     int lmd_d = 100;
     int bias_d = 1;
     int bias_s = 3;
-    float result_exact_rmse = 0;
-    float result_approx_rmse = 0;
-    float result_exact_acc = 0;
-    float result_approx_acc = 0;
-    float result_exact_cost = 0;
-    float result_approx_cost = 0;
+    float result_exact_rmse = 0.0;
+    float result_approx_rmse = 0.0;
+    float result_exact_acc = 0.0;
+    float result_approx_acc = 0.0;
+    float result_exact_cost = 0.0;
+    float result_approx_cost = 0.0;
     string file_name = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\dirty_energy_test\\series_0.csv";
     string data_truth = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\energy_test\\series_0.csv";
     vector<long> original_seq;
