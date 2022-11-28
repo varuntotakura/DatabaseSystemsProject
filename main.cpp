@@ -705,90 +705,92 @@ float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, st
 
 int main()
 {
-    vector<string> row;
-    string line, word;
-    int start_point_granularity = 1;
-    int interval_granularity = 1;
-    int lmd_a = 100;
-    int lmd_d = 100;
-    int bias_d = 1;
-    int bias_s = 3;
-    float result_exact_rmse = 0.0;
-    float result_approx_rmse = 0.0;
-    float result_exact_acc = 0.0;
-    float result_approx_acc = 0.0;
-    float result_exact_cost = 0.0;
-    float result_approx_cost = 0.0;
-    string file_name = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\dirty_energy_test\\series_0.csv";
-    string data_truth = "D:\\FSU\\Semester 1\\Database Systems\\Project\\DatabaseSystemsProject\\data\\energy_test\\series_0.csv";
-    vector<long> original_seq;
-    vector<long> ground_truth_seq;
-    string metric;
-    int cnt = 0;
-    ifstream inputFile1;
-    inputFile1.open(file_name);
-    getline(inputFile1, line);
-    line = "";
-    while (getline(inputFile1, line))
-    {
-        string first_column;
-        string second_column;
-        stringstream inputString(line);
-        getline(inputString, first_column, ',');
-        getline(inputString, second_column);
-        original_seq.push_back(stol(second_column));
-        cnt += 1;
+    for(int filecount=0; filecount<5; filecount++){
+        cout<<"File: "<<filecount+1<<endl;
+        string line, word;
+        int start_point_granularity = 1;
+        int interval_granularity = 1;
+        int lmd_a = 100;
+        int lmd_d = 100;
+        int bias_d = 1;
+        int bias_s = 3;
+        float result_exact_rmse = 0.0;
+        float result_approx_rmse = 0.0;
+        float result_exact_acc = 0.0;
+        float result_approx_acc = 0.0;
+        float result_exact_cost = 0.0;
+        float result_approx_cost = 0.0;
+        string file_name = "./data/dirty_energy/series_"+to_string(filecount)+".csv";
+        string data_truth = "./data/energy/series_"+to_string(filecount)+".csv";
+        vector<long> original_seq;
+        vector<long> ground_truth_seq;
+        string metric;
+        int cnt = 0;
+        ifstream inputFile1;
+        inputFile1.open(file_name);
+        getline(inputFile1, line);
         line = "";
-    }
-    cnt = 0;
-    ifstream inputFile2;
-    inputFile2.open(data_truth);
-    getline(inputFile2, line);
-    line = "";
-    while (getline(inputFile2, line))
-    {
-        string first_column;
-        string second_column;
-        string thrid_column;
-        stringstream inputString(line);
-        getline(inputString, first_column, ',');
-        getline(inputString, second_column, ',');
-        getline(inputString, thrid_column);
-        ground_truth_seq.push_back(stol(second_column));
-        cnt += 1;
+        while (getline(inputFile1, line))
+        {
+            string first_column;
+            string second_column;
+            stringstream inputString(line);
+            getline(inputString, first_column, ',');
+            getline(inputString, second_column);
+            original_seq.push_back(stol(second_column));
+            cnt += 1;
+            line = "";
+        }
+        cnt = 0;
+        ifstream inputFile2;
+        inputFile2.open(data_truth);
+        getline(inputFile2, line);
         line = "";
+        while (getline(inputFile2, line))
+        {
+            string first_column;
+            string second_column;
+            string thrid_column;
+            stringstream inputString(line);
+            getline(inputString, first_column, ',');
+            getline(inputString, second_column, ',');
+            getline(inputString, thrid_column);
+            ground_truth_seq.push_back(stol(second_column));
+            cnt += 1;
+            line = "";
+        }
+        long source_values = 0;
+        long time_scale;
+        ExactRepair exact_rep;
+        MedianApproximationAll median_approx_all;
+        exact_rep = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
+        median_approx_all = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
+
+        cout << "Generating Values" << endl;
+        vector<long> exact_res = equal_series_generate(exact_rep.min_eps_t, exact_rep.min_s_0, exact_rep.m_best);
+        vector<long> appro_res = equal_series_generate(median_approx_all.eps_t, median_approx_all.s_0, median_approx_all.m);
+
+        cout << "RMSE: " << endl;
+        metric = "rmse";
+        result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+        cout << "Exact:" << result_exact_rmse << endl;
+        result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
+        cout << "Approx:" << result_approx_rmse <<endl;
+
+        cout << "Accuarcy: " << endl;
+        metric = "accuracy";
+        result_exact_acc = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+        cout << "Exact:" << result_exact_acc << endl;
+        result_approx_acc = metric_res(appro_res, ground_truth_seq, original_seq, metric);
+        cout << "Approx:" << result_approx_acc <<endl;
+
+        cout << "Cost: " << endl;
+        metric = "cost";
+        result_exact_cost = metric_res(exact_res, ground_truth_seq, original_seq, metric);
+        cout << "Exact:" << result_exact_cost << endl;
+        result_approx_cost = metric_res(appro_res, ground_truth_seq, original_seq, metric);
+        cout << "Approx:" << result_approx_cost <<endl;
+        cout<<endl;
     }
-    long source_values = 0;
-    long time_scale;
-    ExactRepair exact_rep;
-    MedianApproximationAll median_approx_all;
-    exact_rep = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
-    median_approx_all = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
-
-    cout << "exact_res" << endl;
-    vector<long> exact_res = equal_series_generate(exact_rep.min_eps_t, exact_rep.min_s_0, exact_rep.m_best);
-    cout << "appro_res" << endl;
-    vector<long> appro_res = equal_series_generate(median_approx_all.eps_t, median_approx_all.s_0, median_approx_all.m);
-
-    cout << "RMSE: " << endl;
-    metric = "rmse";
-    result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
-    cout << "Exact:" << result_exact_rmse << endl;
-    result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-    cout << "Approx:" << result_approx_rmse <<endl;
-
-    cout << "Accuarcy: " << endl;
-    metric = "accuracy";
-    result_exact_acc = metric_res(exact_res, ground_truth_seq, original_seq, metric);
-    cout << "Exact:" << result_exact_acc << endl;
-    result_approx_acc = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-    cout << "Approx:" << result_approx_acc <<endl;
-
-    cout << "Cost: " << endl;
-    metric = "cost";
-    result_exact_cost = metric_res(exact_res, ground_truth_seq, original_seq, metric);
-    cout << "Exact:" << result_exact_cost << endl;
-    result_approx_cost = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-    cout << "Approx:" << result_approx_cost <<endl;
     return 0;
 }
