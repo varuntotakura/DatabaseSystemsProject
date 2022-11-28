@@ -14,8 +14,6 @@
 #include <time.h>
 #include <array>
 #include <tuple>
-// #include "Functions\exact.h"
-// #include "Functions\metrics.h"
 
 using namespace std;
 
@@ -34,7 +32,6 @@ long median(vector<long> arr, long size)
 
 long determine_interval(vector<long> t)
 {
-    // cout << "determine_interval" <<endl;
     vector<long> eps;
     int i;
     for (i = 1; i < t.size(); i++)
@@ -44,7 +41,6 @@ long determine_interval(vector<long> t)
     return median(eps, eps.size());
 }
 
-// bool find(long* arr, long elem){
 bool find(vector<long> arr, long elem)
 {
     int n = arr.size();
@@ -60,7 +56,6 @@ bool find(vector<long> arr, long elem)
 
 bool check_interval_lb(long interval, long min_cost, vector<long> eps_list)
 {
-    // cout << "check_interval_lb" <<endl;
     long c = 0;
     for (int i = 0; i < eps_list.size(); i++)
     {
@@ -82,7 +77,6 @@ bool check_st_lb(int d, vector<long> eps_list, long min_cost, long lmd_d, long e
 
 vector<vector<long>> trace_back(vector<vector<long>> op, vector<long> t, long s_0, long eps_t, long m_best)
 {
-    // cout << "trace_back" <<endl;
     int n = t.size();
     // vector<int> M;
     vector<vector<long>> M;
@@ -109,7 +103,6 @@ vector<vector<long>> trace_back(vector<vector<long>> op, vector<long> t, long s_
         }
         count += 1;
     }
-    // M = reverse(M.begin(), M.end());
     return M;
 }
 
@@ -124,13 +117,6 @@ public:
 
 MatchSearch match_searching(vector<long> t, long eps_t, long s_0, long lmd_a, long lmd_d)
 {
-    // cout << "match_searching" <<endl;
-    // vector<long> dp; // long dp[99]; // stack<long> dp;
-    // vector<long> op; // long op[99]; // stack<long> op;
-    // for(int i=1; i<(n+1); i++){
-    //     dp.push_back({});
-    //     op.push_back({});
-    // }
     int n = t.size();
     vector<vector<long>> dp;
     vector<vector<long>> op;
@@ -141,9 +127,6 @@ MatchSearch match_searching(vector<long> t, long eps_t, long s_0, long lmd_a, lo
     }
     dp[0].push_back(0);
     op[0].push_back(0);
-    // for(int i=1; i<n+1; i++){
-
-    // }
     for (int i = 1; i < n + 1; i++)
     {
         dp[i].push_back(i * lmd_d);
@@ -210,7 +193,6 @@ public:
 
 ExactRepair exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_granularity, int start_point_granularity, int bias_d, int bias_s)
 {
-    // cout << "exact_repair" <<endl;
     vector<long> eps_list;
     int n = t.size();
 
@@ -220,8 +202,8 @@ ExactRepair exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_gr
     }
     long eps_md = median(eps_list, eps_list.size());
     long eps_t = round_to_granularity(eps_md, interval_granularity);
-    vector<long> eps_t_traverse_range; // long* eps_t_traverse_range;
-    vector<long> eps_t_traversed;      // long* eps_t_traversed;
+    vector<long> eps_t_traverse_range;
+    vector<long> eps_t_traversed;
     float min_cost = 10e8;
     vector<vector<long>> M;
     float cost;
@@ -318,7 +300,6 @@ ExactRepair exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_gr
 
 long determine_interval2(vector<long> t, long interval_granularity)
 {
-    // cout << "determine_interval" <<endl;
     vector<long> eps_list;
     for (int i = 1; i < t.size(); i++)
     {
@@ -341,7 +322,6 @@ public:
 StartPointApproximation start_point_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
 {
     long s_0 = t[0];
-    // cout << "start_point_approximation" <<endl;
     int n = t.size();
     long eps_t = determine_interval2(t, interval_granularity);
     vector<vector<long>> dp;
@@ -416,7 +396,6 @@ public:
 
 MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
 {
-    // cout << "median approximation" <<endl;
     int n = t.size();
     long eps_t = determine_interval2(t, interval_granularity);
     int n_md = floor(n / 2);
@@ -477,8 +456,6 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d,
             long del_res_l = dp_l[i - 1][m] + lmd_d;
             long del_res_r = dp_r[i - 1][m] + lmd_d;
             long min_res_l = min({move_res_l, add_res_l, del_res_l});
-            // long temp = min(move_res_l, add_res_l);
-            // long min_res_l = min(temp, del_res_l);
             if (move_res_l == min_res_l)
             {
                 dp_l[i].push_back(move_res_l);
@@ -552,7 +529,6 @@ public:
 
 MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
 {
-    // cout << "median_approximation_all" <<endl;
     MedianApproximation median_approx;
     StartPointApproximation start_point_approx;
     median_approx = median_approximation(t, lmd_a, lmd_d, interval_granularity);
@@ -575,7 +551,6 @@ MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a, long
 
 vector<long> equal_series_generate(long eps_t, long s_0, long m)
 {
-    // cout << "equal_series_generate" <<endl;
     vector<long> ret;
     for (int i = 0; i < m; i++)
     {
@@ -586,7 +561,6 @@ vector<long> equal_series_generate(long eps_t, long s_0, long m)
 
 float cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d)
 {
-    // cout << "cal_cost" <<endl;
     lmd_a = 5;
     lmd_d = 5;
     vector<long> s1;
@@ -642,7 +616,6 @@ float cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d)
 
 float cal_rmse(vector<long> truth, vector<long> repair)
 {
-    // cout << "cal_rmse" <<endl;
     int min_len = min(truth.size(), repair.size());
     vector<long> diff;
     float res;
@@ -651,13 +624,12 @@ float cal_rmse(vector<long> truth, vector<long> repair)
     {
         sum += pow(abs(truth[i] - repair[i]), 2);
     }
-    res = sqrt(sum / min_len); // cnt
+    res = sqrt(sum / min_len);
     return res;
 }
 
 float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair)
 {
-    // cout << "calAccuracy" <<endl;
     int min_len;
     min_len = min({truth.size(), fault.size(), repair.size()});
     float error = 0;
@@ -685,7 +657,6 @@ float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair)
 
 float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, string metric_name)
 {
-    // cout << "metric_res" <<endl;
     if (metric_name == "cost")
     {
         long lmd_a = 5 * (truth[1] - truth[0]);
