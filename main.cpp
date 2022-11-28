@@ -19,15 +19,17 @@
 
 using namespace std;
 
-float median(vector<long> arr, long size)
+long median(vector<long> arr, long size)
 {
     sort(arr.begin(), arr.end());
     size = arr.size();
+    long temp;
     if (size % 2 != 0)
     {
-        return arr[(int)size / 2];
+        temp = arr[(int)(size/2)];
     }
-    return (arr[(int)(size - 1) / 2] + arr[(int)size / 2]) / 2.0;
+    temp = (arr[(int)(size - 1) / 2] + arr[(int)(size/2)]) / 2.0;
+    return temp;
 }
 
 long determine_interval(vector<long> t)
@@ -37,7 +39,7 @@ long determine_interval(vector<long> t)
     int i;
     for (i = 1; i < t.size(); i++)
     {
-        eps.push_back((long)t[i] - t[i - 1]);
+        eps.push_back((long)(t[i] - t[i - 1]));
     }
     return median(eps, eps.size());
 }
@@ -314,21 +316,17 @@ ExactRepair exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_gr
     return exact_rep;
 }
 
-long determine_interval(vector<long> t, long interval_granularity)
+long determine_interval2(vector<long> t, long interval_granularity)
 {
-    // cout << "detrimine_interval" <<endl;
+    // cout << "determine_interval" <<endl;
     vector<long> eps_list;
-    long eps_md;
     for (int i = 1; i < t.size(); i++)
     {
         eps_list.push_back((long)(t[i] - t[i - 1]));
     }
-    int len = eps_list.size(); //*(&eps_list + 1) - eps_list;
-    if (len % 2 == 0)
-        eps_md = (eps_list[len / 2 - 1] + eps_list[len / 2]) / 2;
-    else
-        eps_md = eps_list[len / 2];
-    return round(eps_md / interval_granularity) * interval_granularity;
+    long eps_md = median(eps_list, eps_list.size());
+    long eps = round(eps_md / interval_granularity) * interval_granularity;
+    return eps;
 }
 
 class StartPointApproximation
@@ -340,13 +338,12 @@ public:
     float m_best;
 };
 
-StartPointApproximation start_point_approximation(vector<long> t, long lmd_a = 5, long lmd_d = 5, long interval_granularity = 1000)
+StartPointApproximation start_point_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
 {
+    long s_0 = t[0];
     // cout << "start_point_approximation" <<endl;
     int n = t.size();
-    long eps_t;
-    eps_t = determine_interval(t, interval_granularity);
-    long s_0 = t[0];
+    long eps_t = determine_interval2(t, interval_granularity);
     vector<vector<long>> dp;
     vector<vector<long>> op;
     for (int i = 0; i < n+1; i++)
@@ -365,13 +362,13 @@ StartPointApproximation start_point_approximation(vector<long> t, long lmd_a = 5
     float m_ub = 10e8;
     float min_cost = 10e8;
     int m = 1;
-    long s_m, move_res, add_res, del_res;
     while (m <= m_ub)
     {
         dp[0].push_back(m * lmd_a);
         op[0].push_back(1);
-        for (int i = 1; i < n; i++)
+        for (int i = 1; i < n+1; i++)
         {
+            long s_m, move_res, add_res, del_res;
             s_m = s_0 + (m - 1) * eps_t;
             move_res = dp[i - 1][m - 1] + abs(t[i - 1] - s_m);
             add_res = dp[i][m - 1] + lmd_a;
@@ -417,13 +414,13 @@ public:
     float m;
 };
 
-MedianApproximation median_approximation(vector<long> t, long lmd_a = 5, long lmd_d = 5, long interval_granularity = 1)
+MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
 {
     // cout << "median approximation" <<endl;
     int n = t.size();
-    long eps_t = determine_interval(t, interval_granularity);
+    long eps_t = determine_interval2(t, interval_granularity);
     int n_md = floor(n / 2);
-    long s_md = median(t, n);
+    long s_md = median(t, t.size());
     vector<vector<long>> dp_l;
     vector<vector<long>> dp_r;
     vector<vector<long>> op_l;
@@ -449,8 +446,7 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a = 5, long lm
     float m_best = 10e8;
     float m_ub = 10e8;
     float min_cost = 10e8;
-    long m = 1;
-    long s_m_l, s_m_r, t_i_l, t_i_r;
+    float m = 1;
     while (m <= m_ub)
     {
         dp_l[0].push_back(m * lmd_a);
@@ -459,6 +455,7 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a = 5, long lm
         op_r[0].push_back(1);
         for (int i = 1; i < n_md+1; i++)
         {
+            long s_m_l, s_m_r, t_i_l, t_i_r;
             if (n % 2 == 1)
             {
                 s_m_l = s_md - m * eps_t;
@@ -526,15 +523,16 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a = 5, long lm
         m += 1;
     }
     long s_0;
+    // Data loss because of the type convertions
     if (n % 2 == 1)
     {
         s_0 = s_md - m_best * eps_t;
-        m = m_best * 2 + 1;
+        m = m_best * 2.0 + 1.0;
     }
     else
     {
         s_0 = s_md - (m_best - 0.5) * eps_t;
-        m = m_best * 2;
+        m = m_best * 2.0;
     }
     MedianApproximation median_approx;
     median_approx.min_cost = min_cost;
@@ -552,7 +550,7 @@ public:
     long m;
 };
 
-MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a = 5, long lmd_d = 5, long interval_granularity = 1)
+MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
 {
     // cout << "median_approximation_all" <<endl;
     MedianApproximation median_approx;
@@ -575,7 +573,7 @@ MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a = 5, 
     return median_approx_all;
 }
 
-vector<long> equal_series_generate(long eps_t, long s_0, long m = 100)
+vector<long> equal_series_generate(long eps_t, long s_0, long m)
 {
     // cout << "equal_series_generate" <<endl;
     vector<long> ret;
