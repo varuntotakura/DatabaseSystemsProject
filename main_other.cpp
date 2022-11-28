@@ -705,8 +705,10 @@ float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, st
 
 int main()
 {
+    vector<string> files = {"air_quality", "pm"};
+    int d_set = 0;
     for(int filecount=0; filecount<5; filecount++){
-        cout<<"Dataset: Energy\n"<<"File: "<<filecount+1<<endl;
+        cout<<"Dataset: "<<files[d_set]<<"\n"<<"File: "<<filecount+1<<endl;
         string line, word;
         int start_point_granularity = 1;
         int interval_granularity = 1;
@@ -720,42 +722,30 @@ int main()
         float result_approx_acc = 0.0;
         float result_exact_cost = 0.0;
         float result_approx_cost = 0.0;
-        string file_name = "./data/dirty_energy/series_"+to_string(filecount)+".csv";
-        string data_truth = "./data/energy/series_"+to_string(filecount)+".csv";
+        string file_name = "./data/"+files[d_set]+"/series_"+to_string(filecount)+".csv";
+        if(filecount>=4){
+            d_set+=1;
+            filecount = 0;
+        }
         vector<long> original_seq;
         vector<long> ground_truth_seq;
         string metric;
         int cnt = 0;
-        ifstream inputFile1;
-        inputFile1.open(file_name);
-        getline(inputFile1, line);
+        ifstream inputFile;
+        inputFile.open(file_name);
+        getline(inputFile, line);
         line = "";
-        while (getline(inputFile1, line))
+        while (getline(inputFile, line))
         {
             string first_column;
             string second_column;
-            stringstream inputString(line);
-            getline(inputString, first_column, ',');
-            getline(inputString, second_column);
-            original_seq.push_back(stol(second_column));
-            cnt += 1;
-            line = "";
-        }
-        cnt = 0;
-        ifstream inputFile2;
-        inputFile2.open(data_truth);
-        getline(inputFile2, line);
-        line = "";
-        while (getline(inputFile2, line))
-        {
-            string first_column;
-            string second_column;
-            string thrid_column;
+            string third_column;
             stringstream inputString(line);
             getline(inputString, first_column, ',');
             getline(inputString, second_column, ',');
-            getline(inputString, thrid_column);
+            getline(inputString, third_column);
             ground_truth_seq.push_back(stol(second_column));
+            original_seq.push_back(stol(third_column));
             cnt += 1;
             line = "";
         }
