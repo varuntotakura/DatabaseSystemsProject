@@ -19,7 +19,7 @@
 using namespace std;
 using namespace std::chrono;
 
-long median(vector<long> arr, long size)
+long median(vector<long> arr, long size) // To calculate the median of given array
 {
     sort(arr.begin(), arr.end());
     size = arr.size();
@@ -32,7 +32,7 @@ long median(vector<long> arr, long size)
     return temp;
 }
 
-long determine_interval(vector<long> t)
+long determine_interval(vector<long> t) // Calculate the Interval
 {
     vector<long> eps;
     int i;
@@ -43,7 +43,7 @@ long determine_interval(vector<long> t)
     return median(eps, eps.size());
 }
 
-bool find(vector<long> arr, long elem)
+bool find(vector<long> arr, long elem) // Find if given element is present in the array or not
 {
     int n = arr.size();
     for (int i = 0; i < n; i++)
@@ -56,7 +56,7 @@ bool find(vector<long> arr, long elem)
     return false;
 }
 
-bool check_interval_lb(long interval, long min_cost, vector<long> eps_list)
+bool check_interval_lb(long interval, long min_cost, vector<long> eps_list) // Check if minimum cost is less than calculated cost
 {
     long c = 0;
     for (int i = 0; i < eps_list.size(); i++)
@@ -66,7 +66,7 @@ bool check_interval_lb(long interval, long min_cost, vector<long> eps_list)
     return (c <= min_cost);
 }
 
-bool check_st_lb(int d, vector<long> eps_list, long min_cost, long lmd_d, long eps_t)
+bool check_st_lb(int d, vector<long> eps_list, long min_cost, long lmd_d, long eps_t) // Check if minimum cost is less than calculated cost
 {
     long c = d * lmd_d;
     for (int i = d; i < eps_list.size(); i++)
@@ -76,7 +76,7 @@ bool check_st_lb(int d, vector<long> eps_list, long min_cost, long lmd_d, long e
     return (c < min_cost);
 }
 
-vector<vector<long>> trace_back(vector<vector<long>> op, vector<long> t, long s_0, long eps_t, long m_best)
+vector<vector<long>> trace_back(vector<vector<long>> op, vector<long> t, long s_0, long eps_t, long m_best) // Traceback Algorithm
 {
     int n = t.size();
     vector<vector<long>> M;
@@ -106,7 +106,7 @@ vector<vector<long>> trace_back(vector<vector<long>> op, vector<long> t, long s_
     return M;
 }
 
-class MatchSearch
+class MatchSearch // To return multiple values from a function
 {
 
 public:
@@ -115,7 +115,7 @@ public:
     float m_best;
 };
 
-MatchSearch match_searching(vector<long> t, long eps_t, long s_0, long lmd_a, long lmd_d)
+MatchSearch match_searching(vector<long> t, long eps_t, long s_0, long lmd_a, long lmd_d) // Match Search Algorithm
 {
     int n = t.size();
     vector<vector<long>> dp;
@@ -178,12 +178,12 @@ MatchSearch match_searching(vector<long> t, long eps_t, long s_0, long lmd_a, lo
     return match_search;
 }
 
-long round_to_granularity(long value, long granularity)
+long round_to_granularity(long value, long granularity) // Calculate Granularity
 {
     return round(value / granularity) * granularity;
 }
 
-class ExactRepair
+class ExactRepair // To return multiple values from a function
 {
 public:
     long min_eps_t;
@@ -191,7 +191,7 @@ public:
     float m_best;
 };
 
-ExactRepair exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_granularity, int start_point_granularity, int bias_d, int bias_s)
+ExactRepair exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_granularity, int start_point_granularity, int bias_d, int bias_s) // Exact Repair Algorithm
 {
     vector<long> eps_list;
     int n = t.size();
@@ -298,7 +298,7 @@ ExactRepair exact_repair(vector<long> t, long lmd_a, long lmd_d, int interval_gr
     return exact_rep;
 }
 
-long determine_interval2(vector<long> t, long interval_granularity)
+long determine_interval2(vector<long> t, long interval_granularity) // Calculate the interval
 {
     vector<long> eps_list;
     for (int i = 1; i < t.size(); i++)
@@ -310,7 +310,7 @@ long determine_interval2(vector<long> t, long interval_granularity)
     return eps;
 }
 
-class StartPointApproximation
+class StartPointApproximation // To return multiple values from a function
 {
 public:
     float min_cost;
@@ -319,7 +319,7 @@ public:
     float m_best;
 };
 
-StartPointApproximation start_point_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
+StartPointApproximation start_point_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity) // To approximate the start point of the given data
 {
     long s_0 = t[0];
     int n = t.size();
@@ -385,7 +385,7 @@ StartPointApproximation start_point_approximation(vector<long> t, long lmd_a, lo
     return start_point_approx;
 }
 
-class MedianApproximation
+class MedianApproximation // To return multiple values from a function
 {
 public:
     float min_cost;
@@ -394,7 +394,7 @@ public:
     float m;
 };
 
-MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
+MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d, long interval_granularity) // To find the median of the given data
 {
     int n = t.size();
     long eps_t = determine_interval2(t, interval_granularity);
@@ -519,7 +519,7 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d,
     return median_approx;
 }
 
-class MedianApproximationAll
+class MedianApproximationAll // To return multiple values from a function
 {
 public:
     long eps_t;
@@ -527,7 +527,7 @@ public:
     long m;
 };
 
-MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a, long lmd_d, long interval_granularity)
+MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a, long lmd_d, long interval_granularity) // Calculate the approximated dataset
 {
     MedianApproximation median_approx;
     StartPointApproximation start_point_approx;
@@ -549,7 +549,7 @@ MedianApproximationAll median_approximation_all(vector<long> t, long lmd_a, long
     return median_approx_all;
 }
 
-vector<long> equal_series_generate(long eps_t, long s_0, long m)
+vector<long> equal_series_generate(long eps_t, long s_0, long m) // Generate Equal Series Data
 {
     vector<long> ret;
     for (int i = 0; i < m; i++)
@@ -559,7 +559,7 @@ vector<long> equal_series_generate(long eps_t, long s_0, long m)
     return ret;
 }
 
-float cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d)
+float cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d) // Calculate Cost of the given two timestamp arrays
 {
     lmd_a = 5;
     lmd_d = 5;
@@ -614,7 +614,7 @@ float cal_cost(vector<long> truth, vector<long> repair, long lmd_a, long lmd_d)
     return res;
 }
 
-float cal_rmse(vector<long> truth, vector<long> repair)
+float cal_rmse(vector<long> truth, vector<long> repair) // Calculate the Root Mean Squared Error
 {
     int min_len = min(truth.size(), repair.size());
     vector<long> diff;
@@ -628,7 +628,7 @@ float cal_rmse(vector<long> truth, vector<long> repair)
     return res;
 }
 
-float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair)
+float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair) // Calcuate the auccuracy of the model
 {
     int min_len;
     min_len = min({truth.size(), fault.size(), repair.size()});
@@ -655,7 +655,7 @@ float calAccuracy(vector<long> truth, vector<long> fault, vector<long> repair)
     return ret;
 }
 
-float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, string metric_name)
+float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, string metric_name) // Calculate the chosen metric
 {
     if (metric_name == "cost")
     {
@@ -674,11 +674,11 @@ float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, st
     return 0;
 }
 
-int main()
+int main() // Main Function
 {
     while (true)
     {
-        vector<string> files = {"energy", "air_quality", "pm", "syn_labdata"};
+        vector<string> files = {"energy", "air_quality", "pm", "syn_labdata"}; // Datasets
         int user_input = 0;
         int filecount = 1;
         cout << "Select the Dataset you would like to execute:" << endl;
@@ -742,6 +742,7 @@ int main()
         ifstream inputFile;
         ifstream inputFile1;
         ifstream inputFile2;
+        // If Energy is choosen as input, it has two files for Original and Ground Truth Values
         if (user_input == 0)
         {
             file_name = "./data/dirty_energy/series_" + to_string(filecount) + ".csv";
@@ -778,7 +779,7 @@ int main()
                 line = "";
             }
         }
-        else
+        else // For all other datasets, they have both original and ground truth in single file
         {
             cnt = 0;
             inputFile.open(file_name);
@@ -803,13 +804,17 @@ int main()
         long time_scale;
         ExactRepair exact_rep;
         MedianApproximationAll median_approx_all;
+        // Calculate the exact repaired values from the given error data
         exact_rep = exact_repair(original_seq, lmd_a, lmd_d, interval_granularity, start_point_granularity, bias_d, bias_s);
+        // Calcualte the approzimate repaired values from the given error data
         median_approx_all = median_approximation_all(original_seq, lmd_a, lmd_d, interval_granularity);
-
+        
+        // To generate the final data for evaluation
         cout << "Generating Values" << endl;
         vector<long> exact_res = equal_series_generate(exact_rep.min_eps_t, exact_rep.min_s_0, exact_rep.m_best);
         vector<long> appro_res = equal_series_generate(median_approx_all.eps_t, median_approx_all.s_0, median_approx_all.m);
-
+        
+        // Calculate the metrics of the data
         cout << "RMSE: " << endl;
         metric = "rmse";
         result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
@@ -831,6 +836,7 @@ int main()
         result_approx_cost = metric_res(appro_res, ground_truth_seq, original_seq, metric);
         cout << "Approx:" << result_approx_cost << endl;
 
+        // Calculate the Time of execution
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<microseconds>(stop - start);
         cout << "Time taken for execution: " << duration.count() << " microseconds" << endl;
