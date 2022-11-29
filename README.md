@@ -6,9 +6,9 @@
 2. Set path in the environment variables
 3. Clone the repository into a folder
 4. Open command prompt
-5. Compile the code, using "g++ main.cpp" command (To run the code with Energy Dataset)
-6. For other datasets, run "g++ main_other.cpp"
-7. After running, an exe file is created "a.exe". Run the exe file to run the code
+5. Compile the code, using "g++ main.cpp" command
+6. After running, an exe file is created "a.exe". Run the exe file to run the code
+7. A prompt will be displayed to you to select the dataset you will like to run, type the appropriate inputs to run successfully
 
 ## How to run SCREEN:
 

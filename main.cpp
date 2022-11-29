@@ -14,8 +14,10 @@
 #include <time.h>
 #include <array>
 #include <tuple>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 long median(vector<long> arr, long size)
 {
@@ -24,9 +26,9 @@ long median(vector<long> arr, long size)
     long temp;
     if (size % 2 != 0)
     {
-        temp = arr[(int)(size/2)];
+        temp = arr[(int)(size / 2)];
     }
-    temp = (arr[(int)(size - 1) / 2] + arr[(int)(size/2)]) / 2.0;
+    temp = (arr[(int)(size - 1) / 2] + arr[(int)(size / 2)]) / 2.0;
     return temp;
 }
 
@@ -324,14 +326,14 @@ StartPointApproximation start_point_approximation(vector<long> t, long lmd_a, lo
     long eps_t = determine_interval2(t, interval_granularity);
     vector<vector<long>> dp;
     vector<vector<long>> op;
-    for (int i = 0; i < n+1; i++)
+    for (int i = 0; i < n + 1; i++)
     {
         dp.push_back(vector<long>());
         op.push_back(vector<long>());
     }
     dp[0].push_back(0);
     op[0].push_back(0);
-    for (int i = 1; i < n+1; i++)
+    for (int i = 1; i < n + 1; i++)
     {
         dp[i].push_back(i * lmd_d);
         op[i].push_back(2);
@@ -344,7 +346,7 @@ StartPointApproximation start_point_approximation(vector<long> t, long lmd_a, lo
     {
         dp[0].push_back(m * lmd_a);
         op[0].push_back(1);
-        for (int i = 1; i < n+1; i++)
+        for (int i = 1; i < n + 1; i++)
         {
             long s_m, move_res, add_res, del_res;
             s_m = s_0 + (m - 1) * eps_t;
@@ -402,7 +404,7 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d,
     vector<vector<long>> dp_r;
     vector<vector<long>> op_l;
     vector<vector<long>> op_r;
-    for (int i = 0; i < n_md+1; i++)
+    for (int i = 0; i < n_md + 1; i++)
     {
         dp_l.push_back(vector<long>());
         op_l.push_back(vector<long>());
@@ -413,7 +415,7 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d,
     op_l[0].push_back(0);
     dp_r[0].push_back(0);
     op_r[0].push_back(0);
-    for (int i = 1; i < n_md+1; i++)
+    for (int i = 1; i < n_md + 1; i++)
     {
         dp_l[i].push_back(i * lmd_d);
         op_l[i].push_back(2);
@@ -430,7 +432,7 @@ MedianApproximation median_approximation(vector<long> t, long lmd_a, long lmd_d,
         op_l[0].push_back(1);
         dp_r[0].push_back(m * lmd_a);
         op_r[0].push_back(1);
-        for (int i = 1; i < n_md+1; i++)
+        for (int i = 1; i < n_md + 1; i++)
         {
             long s_m_l, s_m_r, t_i_l, t_i_r;
             if (n % 2 == 1)
@@ -674,8 +676,51 @@ float metric_res(vector<long> repair, vector<long> truth, vector<long> fault, st
 
 int main()
 {
-    for(int filecount=0; filecount<5; filecount++){
-        cout<<"Dataset: Energy\n"<<"File: "<<filecount+1<<endl;
+    while (true)
+    {
+        vector<string> files = {"energy", "air_quality", "pm", "syn_labdata"};
+        int user_input = 0;
+        int filecount = 1;
+        cout << "Select the Dataset you would like to execute:" << endl;
+        cout << "1. Energy" << endl;
+        cout << "2. Air Quality" << endl;
+        cout << "3. PM" << endl;
+        cout << "4. Syn_Lab Data" << endl;
+        cout << "Type Here: ";
+        cin >> user_input;
+        cout << endl;
+        user_input -= 1;
+        switch (user_input)
+        {
+        case 0:
+            cout << "You have choosen '" << files[user_input] << "' dataset" << endl;
+            cout << "Which file you would like to execute among 5 files: ";
+            cin >> filecount;
+            break;
+        case 1:
+            cout << "You have choosen '" << files[user_input] << "' dataset" << endl;
+            cout << "Which file you would like to execute among 5 files: ";
+            cin >> filecount;
+            break;
+        case 2:
+            cout << "You have choosen '" << files[user_input] << "' dataset" << endl;
+            cout << "Which file you would like to execute among 5 files: ";
+            cin >> filecount;
+            break;
+        case 3:
+            cout << "You have choosen '" << files[user_input] << "' dataset" << endl;
+            break;
+        default:
+            cout << "Invalid input" << endl;
+            break;
+        }
+        cout << endl;
+        filecount -= 1;
+        cout << "Executing file: " << filecount + 1 << endl;
+        cout << "Dataset: " << files[user_input] << "\n"
+             << "File: " << filecount + 1 << endl;
+        cout << endl;
+        auto start = high_resolution_clock::now();
         string line, word;
         int start_point_granularity = 1;
         int interval_granularity = 1;
@@ -689,44 +734,70 @@ int main()
         float result_approx_acc = 0.0;
         float result_exact_cost = 0.0;
         float result_approx_cost = 0.0;
-        string file_name = "./data/dirty_energy/series_"+to_string(filecount)+".csv";
-        string data_truth = "./data/energy/series_"+to_string(filecount)+".csv";
+        string file_name = "./data/" + files[user_input] + "/series_" + to_string(filecount) + ".csv";
         vector<long> original_seq;
         vector<long> ground_truth_seq;
         string metric;
         int cnt = 0;
+        ifstream inputFile;
         ifstream inputFile1;
-        inputFile1.open(file_name);
-        getline(inputFile1, line);
-        line = "";
-        while (getline(inputFile1, line))
-        {
-            string first_column;
-            string second_column;
-            stringstream inputString(line);
-            getline(inputString, first_column, ',');
-            getline(inputString, second_column);
-            original_seq.push_back(stol(second_column));
-            cnt += 1;
-            line = "";
-        }
-        cnt = 0;
         ifstream inputFile2;
-        inputFile2.open(data_truth);
-        getline(inputFile2, line);
-        line = "";
-        while (getline(inputFile2, line))
+        if (user_input == 0)
         {
-            string first_column;
-            string second_column;
-            string thrid_column;
-            stringstream inputString(line);
-            getline(inputString, first_column, ',');
-            getline(inputString, second_column, ',');
-            getline(inputString, thrid_column);
-            ground_truth_seq.push_back(stol(second_column));
-            cnt += 1;
+            file_name = "./data/dirty_energy/series_" + to_string(filecount) + ".csv";
+            string data_truth = "./data/energy/series_" + to_string(filecount) + ".csv";
+            inputFile1.open(file_name);
+            getline(inputFile1, line);
             line = "";
+            while (getline(inputFile1, line))
+            {
+                string first_column;
+                string second_column;
+                stringstream inputString(line);
+                getline(inputString, first_column, ',');
+                getline(inputString, second_column);
+                original_seq.push_back(stol(second_column));
+                cnt += 1;
+                line = "";
+            }
+            cnt = 0;
+            inputFile2.open(data_truth);
+            getline(inputFile2, line);
+            line = "";
+            while (getline(inputFile2, line))
+            {
+                string first_column;
+                string second_column;
+                string thrid_column;
+                stringstream inputString(line);
+                getline(inputString, first_column, ',');
+                getline(inputString, second_column, ',');
+                getline(inputString, thrid_column);
+                ground_truth_seq.push_back(stol(second_column));
+                cnt += 1;
+                line = "";
+            }
+        }
+        else
+        {
+            cnt = 0;
+            inputFile.open(file_name);
+            getline(inputFile, line);
+            line = "";
+            while (getline(inputFile, line))
+            {
+                string first_column;
+                string second_column;
+                string third_column;
+                stringstream inputString(line);
+                getline(inputString, first_column, ',');
+                getline(inputString, second_column, ',');
+                getline(inputString, third_column);
+                ground_truth_seq.push_back(stol(second_column));
+                original_seq.push_back(stol(third_column));
+                cnt += 1;
+                line = "";
+            }
         }
         long source_values = 0;
         long time_scale;
@@ -744,22 +815,26 @@ int main()
         result_exact_rmse = metric_res(exact_res, ground_truth_seq, original_seq, metric);
         cout << "Exact:" << result_exact_rmse << endl;
         result_approx_rmse = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-        cout << "Approx:" << result_approx_rmse <<endl;
+        cout << "Approx:" << result_approx_rmse << endl;
 
         cout << "Accuarcy: " << endl;
         metric = "accuracy";
         result_exact_acc = metric_res(exact_res, ground_truth_seq, original_seq, metric);
         cout << "Exact:" << result_exact_acc << endl;
         result_approx_acc = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-        cout << "Approx:" << result_approx_acc <<endl;
+        cout << "Approx:" << result_approx_acc << endl;
 
         cout << "Cost: " << endl;
         metric = "cost";
         result_exact_cost = metric_res(exact_res, ground_truth_seq, original_seq, metric);
         cout << "Exact:" << result_exact_cost << endl;
         result_approx_cost = metric_res(appro_res, ground_truth_seq, original_seq, metric);
-        cout << "Approx:" << result_approx_cost <<endl;
-        cout<<endl;
+        cout << "Approx:" << result_approx_cost << endl;
+
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
+        cout << "Time taken for execution: " << duration.count() << " microseconds" << endl;
+        cout << endl;
     }
     return 0;
 }
