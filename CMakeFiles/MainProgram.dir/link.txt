@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\MainProgram.dir/objects.a
+C:\PROGRA~1\CODEBL~1\MinGW\bin\ar.exe qc CMakeFiles\MainProgram.dir/objects.a @CMakeFiles\MainProgram.dir\objects1.rsp
+C:\PROGRA~1\CODEBL~1\MinGW\bin\C__~1.EXE  -std=c++14 -Wl,--whole-archive CMakeFiles\MainProgram.dir/objects.a -Wl,--no-whole-archive -o MainProgram.exe -Wl,--out-implib,libMainProgram.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\MainProgram.dir\linklibs.rsp

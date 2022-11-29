@@ -1,0 +1,3 @@
+D:/FSU/Semester 1/Database Systems/Project/DatabaseSystemsProject/CMakeFiles/MainProgram.dir
+D:/FSU/Semester 1/Database Systems/Project/DatabaseSystemsProject/CMakeFiles/edit_cache.dir
+D:/FSU/Semester 1/Database Systems/Project/DatabaseSystemsProject/CMakeFiles/rebuild_cache.dir
