@@ -1,5 +1,14 @@
-Energy Dataset:
+PM ataset:
 RMSE:
 Exact:10.31147
 Approx:122.0
 
+Energy Dataset:
+RMSE:
+Exact:4.27
+Approx:31.5
+
+AirQuality 
+RMSE:
+Exact:43.9
+Approx: 26.7

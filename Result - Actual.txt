@@ -22,7 +22,7 @@ Dataset: energy
 File: 2
 Generating Values
 RMSE:
-Exact:1
+Exact:0.7
 Approx:2
 Accuarcy:
 Exact:0.99974
@@ -154,7 +154,7 @@ File: 2
 Generating Values
 RMSE:
 Exact:2
-Approx:3
+Approx:3.2
 Accuarcy:
 Exact:0.768493
 Approx:0.60789
